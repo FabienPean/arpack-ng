@@ -269,6 +269,8 @@ jobs:
             mingw-w64-x86_64-ninja
             mingw-w64-x86_64-gcc-fortran
             mingw-w64-x86_64-openblas
+            mingw-w64-x86_64-binutils
+            mingw-w64-x86_64-python-mingw-ldd
       - name: Clone and check out repository code
         uses: actions/checkout@v2
         with:
@@ -283,4 +285,14 @@ jobs:
           mkdir -p build && cd build
           cmake -GNinja -DICB=ON -DEXAMPLES=ON ..
           cmake --build . -v
+      - uses: actions/upload-artifact@v3
+        with:
+          name: windows_cmake_build_dir
+          path: build
+      - name: deps
+        run: |
+          find build/ -executable -type f -exec ldd {} \;
+      - name: Run tests
+        run: |
+          cd build
           ctest --output-on-failure
