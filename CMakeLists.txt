@@ -58,24 +58,6 @@ function(prefixlist list_name prefix)
     set(${list_name} "${${list_name}_TMP}" PARENT_SCOPE)
 endfunction(prefixlist)
 
-function(examples list_name)
-    foreach(l ${${list_name}})
-        get_filename_component(lwe ${l} NAME_WE)
-        add_executable(${lwe} ${arpackexample_DIR}/${l} ${examples_EXTRA_SRCS})
-        target_link_libraries(${lwe} arpack LAPACK::LAPACK BLAS::BLAS ${EXTRA_LDFLAGS})
-        add_test(NAME "${lwe}_ex" COMMAND ${lwe} WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    endforeach()
-endfunction(examples)
-
-function(pexamples list_name)
-    foreach(l ${${list_name}})
-        get_filename_component(lwe ${l} NAME_WE)
-        add_executable(${lwe} ${parpackexample_DIR}/${l} )
-        target_link_libraries(${lwe} parpack arpack MPI::MPI_Fortran)
-        add_test(NAME "${lwe}_ex" COMMAND mpirun -n 2 ./${lwe} WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    endforeach()
-endfunction(pexamples)
-
 if (PYTHON3)
     enable_language(C CXX) # Boost requirement.
     set(CMAKE_CXX_STANDARD 14) # Boost requirement.
@@ -446,6 +428,24 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 ############################
 # EXAMPLES
 ############################
+function(examples list_name)
+    foreach(l ${${list_name}})
+        get_filename_component(lwe ${l} NAME_WE)
+        add_executable(${lwe} ${arpackexample_DIR}/${l} ${examples_EXTRA_SRCS})
+        target_link_libraries(${lwe} arpack LAPACK::LAPACK BLAS::BLAS ${EXTRA_LDFLAGS})
+        add_test(NAME "${lwe}_ex" COMMAND ${lwe} WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    endforeach()
+endfunction(examples)
+
+function(pexamples list_name)
+    foreach(l ${${list_name}})
+        get_filename_component(lwe ${l} NAME_WE)
+        add_executable(${lwe} ${parpackexample_DIR}/${l} )
+        target_link_libraries(${lwe} parpack arpack MPI::MPI_Fortran)
+        add_test(NAME "${lwe}_ex" COMMAND mpirun -n 2 ./${lwe} WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    endforeach()
+endfunction(pexamples)
+
 if (EXAMPLES)
     ############################
     # EXAMPLES/BAND
