@@ -1,21 +1,21 @@
-c
-c\SCCS Information: @(#)
-c FILE: stats.F   SID: 2.1   DATE OF SID: 4/19/96   RELEASE: 2
-c     %---------------------------------------------%
-c     | Initialize statistic and timing information |
-c     | for symmetric Arnoldi code.                 |
-c     %---------------------------------------------%
+!
+!\SCCS Information: @(#)
+! FILE: stats.F   SID: 2.1   DATE OF SID: 4/19/96   RELEASE: 2
+!     %---------------------------------------------%
+!     | Initialize statistic and timing information |
+!     | for symmetric Arnoldi code.                 |
+!     %---------------------------------------------%
 
       subroutine sstats
 
-c     %--------------------------------%
-c     | See stat.doc for documentation |
-c     %--------------------------------%
+!     %--------------------------------%
+!     | See stat.doc for documentation |
+!     %--------------------------------%
       include   'stat.h'
 
-c     %-----------------------%
-c     | Executable Statements |
-c     %-----------------------%
+!     %-----------------------%
+!     | Executable Statements |
+!     %-----------------------%
 
       nopx   = 0
       nbx    = 0
@@ -34,14 +34,14 @@ c     %-----------------------%
       tgetv0 = 0.0E+0
       trvec  = 0.0E+0
 
-c     %----------------------------------------------------%
-c     | User time including reverse communication overhead |
-c     %----------------------------------------------------%
+!     %----------------------------------------------------%
+!     | User time including reverse communication overhead |
+!     %----------------------------------------------------%
       tmvopx = 0.0E+0
       tmvbx  = 0.0E+0
 
       return
-c
-c     End of sstats
-c
+!
+!     End of sstats
+!
       end

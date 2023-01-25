@@ -1,86 +1,86 @@
       subroutine mmread(iunit,rep,field,symm,rows,cols,nnz,nnzmax,
      *                 indx,jndx,ival,rval,cval)
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c
-c This routine will read data from a matrix market formatted file.
-c The data may be either sparse coordinate format, or dense array format.
-c
-c The unit iunit must be open, and the file will be rewound on return.
-c
-c 20-Sept-96  Karin A. Remington, NIST ACMD (karin@cam.nist.gov)
-c 18-Oct-96   Change in routine name to match C and Matlab routines.
-c 30-Oct-96   Bug fixes in mmio.f:
-c                  -looping for comment lines
-c                  -fixed non-ansi zero stringlength
-c                  -incorrect size calculation for skew-symmetric arrays
-c 	      Other changes in mmio.f:
-c                  -added integer value parameter to calling sequences
-c                  -enforced proper count in size info line
-c                  -added routine to count words in string (countwd)
-c            (Thanks to G.P.Leendetse and H.Oudshoom for their review
-c             of the initial version and suggested fixes.)
-c 15-Oct-08  fixed illegal attempt of mimicking "do while" construct
-c            by redifing limits inside loop. (lines 443-450)
-c            (Thanks to Geraldo Veiga for his comments.)
-c
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c
-c   Arguments:
-c
-c   name     type      in/out description
-c   ---------------------------------------------------------------
-c
-c   iunit    integer     in   Unit identifier for the file
-c                             containing the data to be read.
-c                             Must be open prior to call.
-c                             Will be rewound on return.
-c
-c   rep     character*10 out  Matrix Market 'representation'
-c                             indicator. On return:
-c
-c                                coordinate   (for sparse data)
-c                                array        (for dense data)
-c                                elemental    (to be added)
-c
-c   field   character*7  out  Matrix Market 'field'. On return:
-c
-c                                real
-c                                complex
-c                                integer
-c                                pattern
-c
-c   symm    character*19 out  Matrix Market 'field'. On return:
-c
-c                                symmetric
-c                                hermitian
-c                                skew-symmetric
-c                                general
-c
-c   rows     integer     out  Number of rows in matrix.
-c
-c   cols     integer     out  Number of columns in matrix.
-c
-c   nnz      integer     out  Number of nonzero entries required to
-c                             store matrix.
-c
-c   nnzmax   integer     in   Maximum dimension of data arrays.
-c
-c   indx     integer(nnz)out  Row indices for coordinate format.
-c                             Undefined for array format.
-c
-c   jndx     integer(nnz)out  Column indices for coordinate format.
-c                             Undefined for array format.
-c
-c   ival     integer(nnz) out Integer data (if applicable, see 'field')
-c
-c   rval     double(nnz) out  Real data (if applicable, see 'field')
-c
-c   cval     complex(nnz)out  Complex data (if applicable, see 'field')
-c
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c
-c Declarations:
-c
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!
+! This routine will read data from a matrix market formatted file.
+! The data may be either sparse coordinate format, or dense array format.
+!
+! The unit iunit must be open, and the file will be rewound on return.
+!
+! 20-Sept-96  Karin A. Remington, NIST ACMD (karin@cam.nist.gov)
+! 18-Oct-96   Change in routine name to match C and Matlab routines.
+! 30-Oct-96   Bug fixes in mmio.f:
+!                  -looping for comment lines
+!                  -fixed non-ansi zero stringlength
+!                  -incorrect size calculation for skew-symmetric arrays
+! 	      Other changes in mmio.f:
+!                  -added integer value parameter to calling sequences
+!                  -enforced proper count in size info line
+!                  -added routine to count words in string (countwd)
+!            (Thanks to G.P.Leendetse and H.Oudshoom for their review
+!             of the initial version and suggested fixes.)
+! 15-Oct-08  fixed illegal attempt of mimicking "do while" construct
+!            by redifing limits inside loop. (lines 443-450)
+!            (Thanks to Geraldo Veiga for his comments.)
+!
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!
+!   Arguments:
+!
+!   name     type      in/out description
+!   ---------------------------------------------------------------
+!
+!   iunit    integer     in   Unit identifier for the file
+!                             containing the data to be read.
+!                             Must be open prior to call.
+!                             Will be rewound on return.
+!
+!   rep     character*10 out  Matrix Market 'representation'
+!                             indicator. On return:
+!
+!                                coordinate   (for sparse data)
+!                                array        (for dense data)
+!                                elemental    (to be added)
+!
+!   field   character*7  out  Matrix Market 'field'. On return:
+!
+!                                real
+!                                complex
+!                                integer
+!                                pattern
+!
+!   symm    character*19 out  Matrix Market 'field'. On return:
+!
+!                                symmetric
+!                                hermitian
+!                                skew-symmetric
+!                                general
+!
+!   rows     integer     out  Number of rows in matrix.
+!
+!   cols     integer     out  Number of columns in matrix.
+!
+!   nnz      integer     out  Number of nonzero entries required to
+!                             store matrix.
+!
+!   nnzmax   integer     in   Maximum dimension of data arrays.
+!
+!   indx     integer(nnz)out  Row indices for coordinate format.
+!                             Undefined for array format.
+!
+!   jndx     integer(nnz)out  Column indices for coordinate format.
+!                             Undefined for array format.
+!
+!   ival     integer(nnz) out Integer data (if applicable, see 'field')
+!
+!   rval     double(nnz) out  Real data (if applicable, see 'field')
+!
+!   cval     complex(nnz)out  Complex data (if applicable, see 'field')
+!
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!
+! Declarations:
+!
       integer ival(*)
       double precision rval(*)
       complex cval(*)
@@ -96,9 +96,9 @@ c
       character symm*19
       character tmp1*1024
       character tmp2*2
-c
-c Read header line and check validity:
-c
+!
+! Read header line and check validity:
+!
       read (iunit,end=1000,fmt=5) tmp1
  5    format(1024A)
       call getwd(mmhead,tmp1,1024,1,next,count)
@@ -112,9 +112,9 @@ c
       call getwd(symm,tmp1,1024,next,next,count)
       if ( count .eq. 0 ) go to 5000
       if ( mmhead .ne. '%%MatrixMarket' ) go to 5000
-c
-c Convert type code to lower case for easier comparisons:
-c
+!
+! Convert type code to lower case for easier comparisons:
+!
       call lowerc(mmtype,1,6)
       if ( mmtype .ne. 'matrix' ) then
          print *,'Invalid matrix type: ',mmtype
@@ -125,9 +125,9 @@ c
          call lowerc(field,1,7)
          call lowerc(symm,1,19)
       endif
-c
-c Test input qualifiers:
-c
+!
+! Test input qualifiers:
+!
       if (rep .ne. 'coordinate' .and. rep .ne. 'array' )
      *   go to 6000
       if (rep .eq. 'coordinate' .and. field .ne. 'integer' .and.
@@ -138,9 +138,9 @@ c
       if (symm .ne. 'general' .and. symm .ne. 'symmetric' .and.
      *    symm .ne. 'hermitian' .and. symm .ne. 'skew-symmetric')
      *   go to 9000
-c
-c Read through comment lines, ignoring content:
-c
+!
+! Read through comment lines, ignoring content:
+!
       read (iunit,end=2000,fmt=200) tmp2
  200  format(1a)
  10   continue
@@ -150,33 +150,33 @@ c
         read (iunit,end=2000,fmt=200) tmp2
         go to 10
  20   continue
-c
-c Just read a non-comment.
-c   Now, back up a line, and read for first int, and back up
-c   again. This will set pointer to just before apparent size
-c   info line.
-c   Before continuing with free form input, count the number of
-c   words on the size info line to ensure there is the right amount
-c   of info (2 words for array matrices, 3 for coordinate matrices).
-c
+!
+! Just read a non-comment.
+!   Now, back up a line, and read for first int, and back up
+!   again. This will set pointer to just before apparent size
+!   info line.
+!   Before continuing with free form input, count the number of
+!   words on the size info line to ensure there is the right amount
+!   of info (2 words for array matrices, 3 for coordinate matrices).
+!
       backspace (iunit)
       read (iunit,end=1000,fmt=5) tmp1
       call countwd(tmp1,1024,1,count)
       if ( rep .eq. 'array' .and. count .ne. 2 ) go to 3000
       if ( rep .eq. 'coordinate' .and. count .ne. 3 ) go to 3500
-c
-c   Correct number of words are present, now back up and read them.
-c
+!
+!   Correct number of words are present, now back up and read them.
+!
       backspace (iunit)
-c
+!
       if ( rep .eq. 'coordinate' ) then
-c
-c Read matrix in sparse coordinate format
-c
+!
+! Read matrix in sparse coordinate format
+!
         read (iunit,fmt=*) rows,cols,nnz
-c
-c Check to ensure adequate storage is available
-c
+!
+! Check to ensure adequate storage is available
+!
         if ( nnz .gt. nnzmax ) then
           print *,'insufficent array lengths for matrix of ',nnz,
      *            ' nonzeros.'
@@ -184,9 +184,9 @@ c
      *            nnzmax,')'
           stop
         endif
-c
-c Read data according to data type (real,integer,complex, or pattern)
-c
+!
+! Read data according to data type (real,integer,complex, or pattern)
+!
         if ( field .eq. 'integer' ) then
           do 30 i=1,nnz
             read (iunit,fmt=*,end=4000) indx(i),jndx(i),ival(i)
@@ -210,15 +210,15 @@ c
         endif
         rewind(iunit)
         return
-c
+!
       elseif ( rep .eq. 'array' ) then
-c
-c Read matrix in dense column-oriented array format
-c
+!
+! Read matrix in dense column-oriented array format
+!
         read (iunit,fmt=*) rows,cols
-c
-c Check to ensure adequate storage is available
-c
+!
+! Check to ensure adequate storage is available
+!
         if ( symm .eq. 'symmetric' .or. symm .eq. 'hermitian' ) then
           nnzreq = (rows*cols - rows)/2 + rows
           nnz = nnzreq
@@ -236,9 +236,9 @@ c
      *             nnzmax,')'
           stop
         endif
-c
-c Read data according to data type (real,integer,complex, or pattern)
-c
+!
+! Read data according to data type (real,integer,complex, or pattern)
+!
         if ( field .eq. 'integer' ) then
           do 60 i=1,nnzreq
             read (iunit,fmt=*,end=4000) ival(i)
@@ -265,9 +265,9 @@ c
         print *, '   coordinate'
         stop
       endif
-c
-c Various error conditions:
-c
+!
+! Various error conditions:
+!
  1000 print *,'Premature end-of-file.'
       print *,'No lines found.'
       stop
@@ -317,74 +317,74 @@ c
       print *, '   hermitian'
       print *, '   skew-symmetric'
       stop
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       end
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c End of subroutine mmread
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! End of subroutine mmread
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       subroutine mminfo(iunit,rep,field,symm,rows,cols,nnz)
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c
-c This routine will read header information from a Matrix Market
-c formatted file.
-c
-c The unit iunit must be open, and the file will be rewound on return.
-c
-c 20-Sept-96  Karin A. Remington, NIST ACMD (karin@cam.nist.gov)
-c 18-Oct-96   Change in routine name to match C and Matlab routines.
-c 30-Oct-96   Bug fixes in mmio.f:
-c                  -looping for comment lines
-c                  -fixed non-ansi zero stringlength
-c                  -incorrect size calculation for skew-symmetric arrays
-c 	      Other changes in mmio.f:
-c                  -added integer value parameter to calling sequences
-c                  -enforced proper count in size info line
-c                  -added routine to count words in string (countwd)
-c            (Thanks to G.P.Leendetse and H.Oudshoom for their review
-c             of the initial version and suggested fixes.)
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c
-c   Arguments:
-c
-c   name     type      in/out description
-c   ---------------------------------------------------------------
-c
-c   iunit  integer     in   Unit identifier for the open file
-c                             containing the data to be read.
-c
-c   rep     character*10 out  Matrix Market 'representation'
-c                             indicator. On return:
-c
-c                                coordinate   (for sparse data)
-c                                array        (for dense data)
-c                                elemental    (to be added)
-c
-c   field   character*7  out  Matrix Market 'field'. On return:
-c
-c                                real
-c                                complex
-c                                integer
-c                                pattern
-c
-c   symm    character*19 out  Matrix Market 'field'. On return:
-c
-c                                symmetric
-c                                hermitian
-c                                skew-symmetric
-c                                general
-c
-c   rows     integer     out  Number of rows in matrix.
-c
-c   cols     integer     out  Number of columns in matrix.
-c
-c   nnz      integer     out  Number of nonzero entries required to store
-c                             the matrix.
-c
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c
-c Declarations:
-c
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!
+! This routine will read header information from a Matrix Market
+! formatted file.
+!
+! The unit iunit must be open, and the file will be rewound on return.
+!
+! 20-Sept-96  Karin A. Remington, NIST ACMD (karin@cam.nist.gov)
+! 18-Oct-96   Change in routine name to match C and Matlab routines.
+! 30-Oct-96   Bug fixes in mmio.f:
+!                  -looping for comment lines
+!                  -fixed non-ansi zero stringlength
+!                  -incorrect size calculation for skew-symmetric arrays
+! 	      Other changes in mmio.f:
+!                  -added integer value parameter to calling sequences
+!                  -enforced proper count in size info line
+!                  -added routine to count words in string (countwd)
+!            (Thanks to G.P.Leendetse and H.Oudshoom for their review
+!             of the initial version and suggested fixes.)
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!
+!   Arguments:
+!
+!   name     type      in/out description
+!   ---------------------------------------------------------------
+!
+!   iunit  integer     in   Unit identifier for the open file
+!                             containing the data to be read.
+!
+!   rep     character*10 out  Matrix Market 'representation'
+!                             indicator. On return:
+!
+!                                coordinate   (for sparse data)
+!                                array        (for dense data)
+!                                elemental    (to be added)
+!
+!   field   character*7  out  Matrix Market 'field'. On return:
+!
+!                                real
+!                                complex
+!                                integer
+!                                pattern
+!
+!   symm    character*19 out  Matrix Market 'field'. On return:
+!
+!                                symmetric
+!                                hermitian
+!                                skew-symmetric
+!                                general
+!
+!   rows     integer     out  Number of rows in matrix.
+!
+!   cols     integer     out  Number of columns in matrix.
+!
+!   nnz      integer     out  Number of nonzero entries required to store
+!                             the matrix.
+!
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!
+! Declarations:
+!
       integer i, rows, cols, nnz, iunit
       integer count
       character mmhead*14
@@ -394,14 +394,14 @@ c
       character symm*19
       character tmp1*1024
       character tmp2*2
-c
-c Read header line and check validity:
-c
+!
+! Read header line and check validity:
+!
       read (iunit,end=1000,fmt=5) tmp1
  5    format(1024A)
-c
-c Parse words from header line:
-c
+!
+! Parse words from header line:
+!
       call getwd(mmhead,tmp1,1024,1,next,count)
       if ( count .eq. 0 ) go to 5000
       call getwd(mmtype,tmp1,1024,next,next,count)
@@ -413,9 +413,9 @@ c
       call getwd(symm,tmp1,1024,next,next,count)
       if ( count .eq. 0 ) go to 5000
       if ( mmhead .ne. '%%MatrixMarket' ) go to 5000
-c
-c Convert type code to upper case for easier comparisons:
-c
+!
+! Convert type code to upper case for easier comparisons:
+!
       call lowerc(mmtype,1,6)
       if ( mmtype .ne. 'matrix' ) then
          print *,'Invalid matrix type: ',mmtype
@@ -426,9 +426,9 @@ c
          call lowerc(field,1,7)
          call lowerc(symm,1,19)
       endif
-c
-c Test input qualifiers:
-c
+!
+! Test input qualifiers:
+!
       if (rep .ne. 'coordinate' .and. rep .ne. 'array' )
      *   go to 6000
       if (rep .eq. 'coordinate' .and. field .ne. 'integer' .and.
@@ -439,9 +439,9 @@ c
       if (symm .ne. 'general' .and. symm .ne. 'symmetric' .and.
      *    symm .ne. 'hermitian' .and. symm .ne. 'skew-symmetric')
      *   go to 9000
-c
-c Read through comment lines, ignoring content:
-c
+!
+! Read through comment lines, ignoring content:
+!
       read (iunit,end=2000,fmt=200) tmp2
  200  format(1a)
  10   continue
@@ -451,40 +451,40 @@ c
         read (iunit,end=2000,fmt=200) tmp2
         go to 10
  20   continue
-c
-c Just read a non-comment.
-c   Now, back up a line, and read for first int, and back up
-c   again. This will set pointer to just before apparent size
-c   info line.
-c   Before continuing with free form input, count the number of
-c   words on the size info line to ensure there is the right amount
-c   of info (2 words for array matrices, 3 for coordinate matrices).
-c
+!
+! Just read a non-comment.
+!   Now, back up a line, and read for first int, and back up
+!   again. This will set pointer to just before apparent size
+!   info line.
+!   Before continuing with free form input, count the number of
+!   words on the size info line to ensure there is the right amount
+!   of info (2 words for array matrices, 3 for coordinate matrices).
+!
       backspace (iunit)
       read (iunit,end=1000,fmt=5) tmp1
       call countwd(tmp1,1024,1,count)
       if ( rep .eq. 'array' .and. count .ne. 2 ) go to 3000
       if ( rep .eq. 'coordinate' .and. count .ne. 3 ) go to 3500
-c
-c   Correct number of words are present, now back up and read them.
-c
+!
+!   Correct number of words are present, now back up and read them.
+!
       backspace (iunit)
-c
+!
       if ( rep .eq. 'coordinate' ) then
-c
-c Read matrix in sparse coordinate format
-c
+!
+! Read matrix in sparse coordinate format
+!
         read (iunit,fmt=*) rows,cols,nnz
-c
-c Rewind before returning
-c
+!
+! Rewind before returning
+!
         rewind(iunit)
         return
-c
+!
       elseif ( rep .eq. 'array' ) then
-c
-c Read matrix in dense column-oriented array format
-c
+!
+! Read matrix in dense column-oriented array format
+!
         read (iunit,fmt=*) rows,cols
         if ( symm .eq. 'symmetric' .or. symm .eq. 'hermitian' ) then
           nnz = (rows*cols - rows)/2 + rows
@@ -493,9 +493,9 @@ c
         else
           nnz = rows*cols
         endif
-c
-c Rewind before returning
-c
+!
+! Rewind before returning
+!
         rewind(iunit)
         return
       else
@@ -505,9 +505,9 @@ c
         print *, '   coordinate'
         stop
       endif
-c
-c Various error conditions:
-c
+!
+! Various error conditions:
+!
  1000 print *,'Premature end-of-file.'
       print *,'No lines found.'
       stop
@@ -553,88 +553,88 @@ c
       print *, '   hermitian'
       print *, '   skew-symmetric'
       stop
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       end
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c End of subroutine mmread
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! End of subroutine mmread
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       subroutine mmwrite(ounit,rep,field,symm,rows,cols,nnz,
      *                    indx,jndx,ival,rval,cval)
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c
-c This routine will write data to a matrix market formatted file.
-c The data may be either sparse coordinate format, or dense array format.
-c
-c The unit ounit must be open.
-c
-c 20-Sept-96  Karin A. Remington, NIST ACMD (karin@cam.nist.gov)
-c 18-Oct-96   Change in routine name to match C and Matlab routines.
-c 30-Oct-96   Bug fixes in mmio.f:
-c                  -looping for comment lines
-c                  -fixed non-ansi zero stringlength
-c                  -incorrect size calculation for skew-symmetric arrays
-c 	      Other changes in mmio.f:
-c                  -added integer value parameter to calling sequences
-c                  -enforced proper count in size info line
-c                  -added routine to count words in string (countwd)
-c            (Thanks to G.P.Leendetse and H.Oudshoom for their review
-c             of the initial version and suggested fixes.)
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c
-c   Arguments:
-c
-c   name     type      in/out description
-c   ---------------------------------------------------------------
-c
-c   ounit  integer     in   Unit identifier for the file
-c                             to which the data will be written.
-c                             Must be open prior to call.
-c
-c   rep     character*   in   Matrix Market 'representation'
-c                             indicator. Valid inputs:
-c
-c                                coordinate   (for sparse data)
-c                                array        (for dense data)
-c                               *elemental*    (to be added)
-c
-c   field   character*   in   Matrix Market 'field'. Valid inputs:
-c
-c                                real
-c                                complex
-c                                integer
-c                                pattern (not valid for dense arrays)
-c
-c   symm    character*   in   Matrix Market 'field'. Valid inputs:
-c
-c                                symmetric
-c                                hermitian
-c                                skew-symmetric
-c                                general
-c
-c   rows     integer     in   Number of rows in matrix.
-c
-c   cols     integer     in   Number of columns in matrix.
-c
-c   nnz      integer     in   Number of nonzero entries in matrix.
-c                             (rows*cols for array matrices)
-c
-c   indx     integer(nnz)in   Row indices for coordinate format.
-c                             Undefined for array format.
-c
-c   jndx     integer(nnz)in   Column indices for coordinate format.
-c                             Undefined for array format.
-c
-c   ival     integer(nnz) in  Integer data (if applicable, see 'field')
-c
-c   rval     double(nnz) in   Real data (if applicable, see 'field')
-c
-c   cval     complex(nnz)in   Complex data (if applicable, see 'field')
-c
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c
-c Declarations:
-c
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!
+! This routine will write data to a matrix market formatted file.
+! The data may be either sparse coordinate format, or dense array format.
+!
+! The unit ounit must be open.
+!
+! 20-Sept-96  Karin A. Remington, NIST ACMD (karin@cam.nist.gov)
+! 18-Oct-96   Change in routine name to match C and Matlab routines.
+! 30-Oct-96   Bug fixes in mmio.f:
+!                  -looping for comment lines
+!                  -fixed non-ansi zero stringlength
+!                  -incorrect size calculation for skew-symmetric arrays
+! 	      Other changes in mmio.f:
+!                  -added integer value parameter to calling sequences
+!                  -enforced proper count in size info line
+!                  -added routine to count words in string (countwd)
+!            (Thanks to G.P.Leendetse and H.Oudshoom for their review
+!             of the initial version and suggested fixes.)
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!
+!   Arguments:
+!
+!   name     type      in/out description
+!   ---------------------------------------------------------------
+!
+!   ounit  integer     in   Unit identifier for the file
+!                             to which the data will be written.
+!                             Must be open prior to call.
+!
+!   rep     character*   in   Matrix Market 'representation'
+!                             indicator. Valid inputs:
+!
+!                                coordinate   (for sparse data)
+!                                array        (for dense data)
+!                               *elemental*    (to be added)
+!
+!   field   character*   in   Matrix Market 'field'. Valid inputs:
+!
+!                                real
+!                                complex
+!                                integer
+!                                pattern (not valid for dense arrays)
+!
+!   symm    character*   in   Matrix Market 'field'. Valid inputs:
+!
+!                                symmetric
+!                                hermitian
+!                                skew-symmetric
+!                                general
+!
+!   rows     integer     in   Number of rows in matrix.
+!
+!   cols     integer     in   Number of columns in matrix.
+!
+!   nnz      integer     in   Number of nonzero entries in matrix.
+!                             (rows*cols for array matrices)
+!
+!   indx     integer(nnz)in   Row indices for coordinate format.
+!                             Undefined for array format.
+!
+!   jndx     integer(nnz)in   Column indices for coordinate format.
+!                             Undefined for array format.
+!
+!   ival     integer(nnz) in  Integer data (if applicable, see 'field')
+!
+!   rval     double(nnz) in   Real data (if applicable, see 'field')
+!
+!   cval     complex(nnz)in   Complex data (if applicable, see 'field')
+!
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!
+! Declarations:
+!
       integer ival(*)
       double precision rval(*)
       complex cval(*)
@@ -642,9 +642,9 @@ c
       integer jndx(*)
       integer i, rows, cols, nnz, nnzreq, ounit
       character*(*)rep,field,symm
-c
-c Test input qualifiers:
-c
+!
+! Test input qualifiers:
+!
       if (rep .ne. 'coordinate' .and. rep .ne. 'array' )
      *   go to 1000
       if (rep .eq. 'coordinate' .and. field .ne. 'integer' .and.
@@ -655,14 +655,14 @@ c
       if (symm .ne. 'general' .and. symm .ne. 'symmetric' .and.
      *    symm .ne. 'hermitian' .and. symm .ne. 'skew-symmetric')
      *   go to 4000
-c
-c Write header line:
-c
+!
+! Write header line:
+!
       write(unit=ounit,fmt=5)rep,' ',field,' ',symm
  5    format('%%MatrixMarket matrix ',11A,1A,8A,1A,20A)
-c
-c Write size information:
-c
+!
+! Write size information:
+!
       if ( rep .eq. 'coordinate' ) then
          nnzreq=nnz
          write(unit=ounit,fmt=*) rows,cols,nnz
@@ -680,20 +680,20 @@ c
      *                                real(cval(i)),aimag(cval(i))
  30         continue
          else
-c        field .eq. 'pattern'
+!        field .eq. 'pattern'
             do 40 i=1,nnzreq
                write(unit=ounit,fmt=*)indx(i),jndx(i)
  40         continue
          endif
       else
-c        rep .eq. 'array'
+!        rep .eq. 'array'
          if ( symm .eq. 'general' ) then
            nnzreq = rows*cols
          elseif ( symm .eq. 'symmetric' .or.
      *            symm .eq. 'hermitian' ) then
            nnzreq = (rows*cols - rows)/2 + rows
          else
-c        symm .eq. 'skew-symmetric'
+!        symm .eq. 'skew-symmetric'
            nnzreq = (rows*cols - rows)/2
          endif
          write(unit=ounit,fmt=*)rows,cols
@@ -706,16 +706,16 @@ c        symm .eq. 'skew-symmetric'
                write(unit=ounit,fmt=*)rval(i)
  60         continue
          else
-c        field .eq. 'complex'
+!        field .eq. 'complex'
             do 70 i=1,nnzreq
                write(unit=ounit,fmt=*)real(cval(i)),aimag(cval(i))
  70         continue
          endif
       endif
       return
-c
-c Various errors
-c
+!
+! Various errors
+!
  1000 print *,'''',rep,''' representation not recognized.'
       print *, 'Recognized representations:'
       print *, '   array'
@@ -741,17 +741,17 @@ c
       print *, '   hermitian'
       print *, '   skew-symmetric'
       stop
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       end
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c End of subroutine mmwrite
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! End of subroutine mmwrite
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       subroutine lowerc(string,pos,len)
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Convert uppercase letters to lowercase letters in string with
-c starting position pos and length len.
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Convert uppercase letters to lowercase letters in string with
+! starting position pos and length len.
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer pos, len
       character*(*) string
 
@@ -768,17 +768,17 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       end
 
       subroutine getwd(word,string,slen,start,next,wlen)
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c     Getwd extracts the first  word from string starting
-c     at position start.  On return, next is the position
-c     of the blank which terminates the word in string.
-c     If the found word is longer than the allocated space
-c     for the word in the calling program, the word will be
-c     truncated to fit.
-c     Count is set to the length of the word found.
-c
-c 30-Oct-96   Bug fix: fixed non-ansi zero stringlength
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!     Getwd extracts the first  word from string starting
+!     at position start.  On return, next is the position
+!     of the blank which terminates the word in string.
+!     If the found word is longer than the allocated space
+!     for the word in the calling program, the word will be
+!     truncated to fit.
+!     Count is set to the length of the word found.
+!
+! 30-Oct-96   Bug fix: fixed non-ansi zero stringlength
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer slen, start, next, begin, space, wlen
       character*(*) word
       character*(*) string
@@ -804,11 +804,11 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       end
 
       subroutine countwd(string,slen,start,count)
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c     Countwd counts the number of words in string starting
-c     at position start.  On return, count is the number of words.
-c 30-Oct-96   Routine added
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!     Countwd counts the number of words in string starting
+!     at position start.  On return, count is the number of words.
+! 30-Oct-96   Routine added
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       character*(*) string
       integer slen, start, next, wordlength, count
       character tmp2*2

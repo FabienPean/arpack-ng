@@ -1,72 +1,72 @@
-c\BeginDoc
-c
-c\Name: pscnorm2
-c
-c Message Passing Layer: BLACS
-c
-c\Description:
-c
-c\Usage:
-c  call pscnorm2 ( COMM, N, X, INC )
-c
-c\Arguments
-c  COMM    BLACS Communicator for the processor grid.  (INPUT)
-c
-c\SCCS Information:
-c FILE: norm2.F   SID: 1.2   DATE OF SID: 3/6/96
-c
-c-----------------------------------------------------------------------
-c
+!\BeginDoc
+!
+!\Name: pscnorm2
+!
+! Message Passing Layer: BLACS
+!
+!\Description:
+!
+!\Usage:
+!  call pscnorm2 ( COMM, N, X, INC )
+!
+!\Arguments
+!  COMM    BLACS Communicator for the processor grid.  (INPUT)
+!
+!\SCCS Information:
+! FILE: norm2.F   SID: 1.2   DATE OF SID: 3/6/96
+!
+!-----------------------------------------------------------------------
+!
       Real function pscnorm2 ( comm, n, x, inc )
-c
-c     %------------------------------%
-c     | BLACS Variables and Routines |
-c     %------------------------------%
-c
+!
+!     %------------------------------%
+!     | BLACS Variables and Routines |
+!     %------------------------------%
+!
       integer    comm
       external   sgsum2d, sgamx2d
-c
-c     %------------------%
-c     | Scalar Arguments |
-c     %------------------%
-c
+!
+!     %------------------%
+!     | Scalar Arguments |
+!     %------------------%
+!
       integer      n, inc
-c
-c     %-----------------%
-c     | Array Arguments |
-c     %-----------------%
-c
+!
+!     %-----------------%
+!     | Array Arguments |
+!     %-----------------%
+!
       Complex
      &             x(n)
-c
-c     %---------------%
-c     | Local Scalars |
-c     %---------------%
-c
+!
+!     %---------------%
+!     | Local Scalars |
+!     %---------------%
+!
       Real
      &             max, buf, zero
       parameter    ( zero = 0.0 )
-c
-c     %---------------------%
-c     | Intrinsic Functions |
-c     %---------------------%
-c
+!
+!     %---------------------%
+!     | Intrinsic Functions |
+!     %---------------------%
+!
       intrinsic    abs, sqrt
-c
-c     %--------------------%
-c     | External Functions |
-c     %--------------------%
-c
+!
+!     %--------------------%
+!     | External Functions |
+!     %--------------------%
+!
       Real
      &             scnrm2
       External     scnrm2
-c
-c     %-----------------------%
-c     | Executable Statements |
-c     %-----------------------%
-c
+!
+!     %-----------------------%
+!     | Executable Statements |
+!     %-----------------------%
+!
       pscnorm2 = scnrm2( n, x, inc)
-c
+!
       max = pscnorm2
       call sgamx2d( comm, 'All', ' ', 1, 1, max, 1, ra, ca,
      &              -1, -1, -1 )
@@ -77,10 +77,10 @@ c
          call sgsum2d( comm, 'All', ' ', 1, 1, pscnorm2, 1, -1, -1 )
          pscnorm2 = max * sqrt(abs(pscnorm2))
       endif
-c
-c     %-----------------%
-c     | End of pscnorm2 |
-c     %-----------------%
-c
+!
+!     %-----------------%
+!     | End of pscnorm2 |
+!     %-----------------%
+!
       return
       end

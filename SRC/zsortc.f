@@ -1,132 +1,132 @@
-c\BeginDoc
-c
-c\Name: zsortc
-c
-c\Description:
-c  Sorts the Complex*16 array in X into the order
-c  specified by WHICH and optionally applies the permutation to the
-c  Double precision  array Y.
-c
-c\Usage:
-c  call zsortc
-c     ( WHICH, APPLY, N, X, Y )
-c
-c\Arguments
-c  WHICH   Character*2.  (Input)
-c          'LM' -> sort X into increasing order of magnitude.
-c          'SM' -> sort X into decreasing order of magnitude.
-c          'LR' -> sort X with real(X) in increasing algebraic order
-c          'SR' -> sort X with real(X) in decreasing algebraic order
-c          'LI' -> sort X with imag(X) in increasing algebraic order
-c          'SI' -> sort X with imag(X) in decreasing algebraic order
-c
-c  APPLY   Logical.  (Input)
-c          APPLY = .TRUE.  -> apply the sorted order to array Y.
-c          APPLY = .FALSE. -> do not apply the sorted order to array Y.
-c
-c  N       Integer.  (INPUT)
-c          Size of the arrays.
-c
-c  X       Complex*16 array of length N.  (INPUT/OUTPUT)
-c          This is the array to be sorted.
-c
-c  Y       Complex*16 array of length N.  (INPUT/OUTPUT)
-c
-c\EndDoc
-c
-c-----------------------------------------------------------------------
-c
-c\BeginLib
-c
-c\Routines called:
-c     dlapy2  LAPACK routine to compute sqrt(x**2+y**2) carefully.
-c
-c\Author
-c     Danny Sorensen               Phuong Vu
-c     Richard Lehoucq              CRPC / Rice University
-c     Dept. of Computational &     Houston, Texas
-c     Applied Mathematics
-c     Rice University
-c     Houston, Texas
-c
-c     Adapted from the sort routine in LANSO.
-c
-c\SCCS Information: @(#)
-c FILE: sortc.F   SID: 2.2   DATE OF SID: 4/20/96   RELEASE: 2
-c
-c\EndLib
-c
-c-----------------------------------------------------------------------
-c
+!\BeginDoc
+!
+!\Name: zsortc
+!
+!\Description:
+!  Sorts the Complex*16 array in X into the order
+!  specified by WHICH and optionally applies the permutation to the
+!  Double precision  array Y.
+!
+!\Usage:
+!  call zsortc
+!     ( WHICH, APPLY, N, X, Y )
+!
+!\Arguments
+!  WHICH   Character*2.  (Input)
+!          'LM' -> sort X into increasing order of magnitude.
+!          'SM' -> sort X into decreasing order of magnitude.
+!          'LR' -> sort X with real(X) in increasing algebraic order
+!          'SR' -> sort X with real(X) in decreasing algebraic order
+!          'LI' -> sort X with imag(X) in increasing algebraic order
+!          'SI' -> sort X with imag(X) in decreasing algebraic order
+!
+!  APPLY   Logical.  (Input)
+!          APPLY = .TRUE.  -> apply the sorted order to array Y.
+!          APPLY = .FALSE. -> do not apply the sorted order to array Y.
+!
+!  N       Integer.  (INPUT)
+!          Size of the arrays.
+!
+!  X       Complex*16 array of length N.  (INPUT/OUTPUT)
+!          This is the array to be sorted.
+!
+!  Y       Complex*16 array of length N.  (INPUT/OUTPUT)
+!
+!\EndDoc
+!
+!-----------------------------------------------------------------------
+!
+!\BeginLib
+!
+!\Routines called:
+!     dlapy2  LAPACK routine to compute sqrt(x**2+y**2) carefully.
+!
+!\Author
+!     Danny Sorensen               Phuong Vu
+!     Richard Lehoucq              CRPC / Rice University
+!     Dept. of Computational &     Houston, Texas
+!     Applied Mathematics
+!     Rice University
+!     Houston, Texas
+!
+!     Adapted from the sort routine in LANSO.
+!
+!\SCCS Information: @(#)
+! FILE: sortc.F   SID: 2.2   DATE OF SID: 4/20/96   RELEASE: 2
+!
+!\EndLib
+!
+!-----------------------------------------------------------------------
+!
       subroutine zsortc (which, apply, n, x, y)
-c
-c     %------------------%
-c     | Scalar Arguments |
-c     %------------------%
-c
+!
+!     %------------------%
+!     | Scalar Arguments |
+!     %------------------%
+!
       character*2 which
       logical    apply
       integer    n
-c
-c     %-----------------%
-c     | Array Arguments |
-c     %-----------------%
-c
+!
+!     %-----------------%
+!     | Array Arguments |
+!     %-----------------%
+!
       Complex*16
      &           x(0:n-1), y(0:n-1)
-c
-c     %---------------%
-c     | Local Scalars |
-c     %---------------%
-c
+!
+!     %---------------%
+!     | Local Scalars |
+!     %---------------%
+!
       integer    i, igap, j
       Complex*16
      &           temp
       Double precision
      &           temp1, temp2
-c
-c     %--------------------%
-c     | External functions |
-c     %--------------------%
-c
+!
+!     %--------------------%
+!     | External functions |
+!     %--------------------%
+!
       Double precision
      &           dlapy2
-c
-c     %--------------------%
-c     | Intrinsic Functions |
-c     %--------------------%
+!
+!     %--------------------%
+!     | Intrinsic Functions |
+!     %--------------------%
        Intrinsic
      &           dble, aimag
-c
-c     %-----------------------%
-c     | Executable Statements |
-c     %-----------------------%
-c
+!
+!     %-----------------------%
+!     | Executable Statements |
+!     %-----------------------%
+!
       igap = n / 2
-c
+!
       if (which .eq. 'LM') then
-c
-c        %--------------------------------------------%
-c        | Sort X into increasing order of magnitude. |
-c        %--------------------------------------------%
-c
+!
+!        %--------------------------------------------%
+!        | Sort X into increasing order of magnitude. |
+!        %--------------------------------------------%
+!
    10    continue
          if (igap .eq. 0) go to 9000
-c
+!
          do 30 i = igap, n-1
             j = i-igap
    20       continue
-c
+!
             if (j.lt.0) go to 30
-c
+!
             temp1 = dlapy2(dble(x(j)),aimag(x(j)))
             temp2 = dlapy2(dble(x(j+igap)),aimag(x(j+igap)))
-c
+!
             if (temp1.gt.temp2) then
                 temp = x(j)
                 x(j) = x(j+igap)
                 x(j+igap) = temp
-c
+!
                 if (apply) then
                     temp = y(j)
                     y(j) = y(j+igap)
@@ -140,30 +140,30 @@ c
    30    continue
          igap = igap / 2
          go to 10
-c
+!
       else if (which .eq. 'SM') then
-c
-c        %--------------------------------------------%
-c        | Sort X into decreasing order of magnitude. |
-c        %--------------------------------------------%
-c
+!
+!        %--------------------------------------------%
+!        | Sort X into decreasing order of magnitude. |
+!        %--------------------------------------------%
+!
    40    continue
          if (igap .eq. 0) go to 9000
-c
+!
          do 60 i = igap, n-1
             j = i-igap
    50       continue
-c
+!
             if (j .lt. 0) go to 60
-c
+!
             temp1 = dlapy2(dble(x(j)),aimag(x(j)))
             temp2 = dlapy2(dble(x(j+igap)),aimag(x(j+igap)))
-c
+!
             if (temp1.lt.temp2) then
                temp = x(j)
                x(j) = x(j+igap)
                x(j+igap) = temp
-c
+!
                if (apply) then
                   temp = y(j)
                   y(j) = y(j+igap)
@@ -177,27 +177,27 @@ c
    60    continue
          igap = igap / 2
          go to 40
-c
+!
       else if (which .eq. 'LR') then
-c
-c        %------------------------------------------------%
-c        | Sort XREAL into increasing order of algebraic. |
-c        %------------------------------------------------%
-c
+!
+!        %------------------------------------------------%
+!        | Sort XREAL into increasing order of algebraic. |
+!        %------------------------------------------------%
+!
    70    continue
          if (igap .eq. 0) go to 9000
-c
+!
          do 90 i = igap, n-1
             j = i-igap
    80       continue
-c
+!
             if (j.lt.0) go to 90
-c
+!
             if (dble(x(j)).gt.dble(x(j+igap))) then
                temp = x(j)
                x(j) = x(j+igap)
                x(j+igap) = temp
-c
+!
                if (apply) then
                   temp = y(j)
                   y(j) = y(j+igap)
@@ -211,26 +211,26 @@ c
    90    continue
          igap = igap / 2
          go to 70
-c
+!
       else if (which .eq. 'SR') then
-c
-c        %------------------------------------------------%
-c        | Sort XREAL into decreasing order of algebraic. |
-c        %------------------------------------------------%
-c
+!
+!        %------------------------------------------------%
+!        | Sort XREAL into decreasing order of algebraic. |
+!        %------------------------------------------------%
+!
   100    continue
          if (igap .eq. 0) go to 9000
          do 120 i = igap, n-1
             j = i-igap
   110       continue
-c
+!
             if (j.lt.0) go to 120
-c
+!
             if (dble(x(j)).lt.dble(x(j+igap))) then
                temp = x(j)
                x(j) = x(j+igap)
                x(j+igap) = temp
-c
+!
                if (apply) then
                   temp = y(j)
                   y(j) = y(j+igap)
@@ -244,26 +244,26 @@ c
   120    continue
          igap = igap / 2
          go to 100
-c
+!
       else if (which .eq. 'LI') then
-c
-c        %--------------------------------------------%
-c        | Sort XIMAG into increasing algebraic order |
-c        %--------------------------------------------%
-c
+!
+!        %--------------------------------------------%
+!        | Sort XIMAG into increasing algebraic order |
+!        %--------------------------------------------%
+!
   130    continue
          if (igap .eq. 0) go to 9000
          do 150 i = igap, n-1
             j = i-igap
   140       continue
-c
+!
             if (j.lt.0) go to 150
-c
+!
             if (aimag(x(j)).gt.aimag(x(j+igap))) then
                temp = x(j)
                x(j) = x(j+igap)
                x(j+igap) = temp
-c
+!
                if (apply) then
                   temp = y(j)
                   y(j) = y(j+igap)
@@ -277,26 +277,26 @@ c
   150    continue
          igap = igap / 2
          go to 130
-c
+!
       else if (which .eq. 'SI') then
-c
-c        %---------------------------------------------%
-c        | Sort XIMAG into decreasing algebraic order  |
-c        %---------------------------------------------%
-c
+!
+!        %---------------------------------------------%
+!        | Sort XIMAG into decreasing algebraic order  |
+!        %---------------------------------------------%
+!
   160    continue
          if (igap .eq. 0) go to 9000
          do 180 i = igap, n-1
             j = i-igap
   170       continue
-c
+!
             if (j.lt.0) go to 180
-c
+!
             if (aimag(x(j)).lt.aimag(x(j+igap))) then
                temp = x(j)
                x(j) = x(j+igap)
                x(j+igap) = temp
-c
+!
                if (apply) then
                   temp = y(j)
                   y(j) = y(j+igap)
@@ -311,12 +311,12 @@ c
          igap = igap / 2
          go to 160
       end if
-c
+!
  9000 continue
       return
-c
-c     %---------------%
-c     | End of zsortc |
-c     %---------------%
-c
+!
+!     %---------------%
+!     | End of zsortc |
+!     %---------------%
+!
       end

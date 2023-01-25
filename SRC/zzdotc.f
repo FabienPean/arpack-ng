@@ -1,19 +1,19 @@
       double complex function zzdotc(n,zx,incx,zy,incy)
-c
-c     forms the dot product of a vector.
-c     jack dongarra, 3/11/78.
-c     modified 12/3/93, array(1) declarations changed to array(*)
-c
+!
+!     forms the dot product of a vector.
+!     jack dongarra, 3/11/78.
+!     modified 12/3/93, array(1) declarations changed to array(*)
+!
       double complex zx(*),zy(*),ztemp
       integer i,incx,incy,ix,iy,n
       ztemp = (0.0d0,0.0d0)
       zzdotc = (0.0d0,0.0d0)
       if(n.le.0)return
       if(incx.eq.1.and.incy.eq.1)go to 20
-c
-c        code for unequal increments or equal increments
-c          not equal to 1
-c
+!
+!        code for unequal increments or equal increments
+!          not equal to 1
+!
       ix = 1
       iy = 1
       if(incx.lt.0)ix = (-n+1)*incx + 1
@@ -25,9 +25,9 @@ c
    10 continue
       zzdotc = ztemp
       return
-c
-c        code for both increments equal to 1
-c
+!
+!        code for both increments equal to 1
+!
    20 do 30 i = 1,n
         ztemp = ztemp + conjg(zx(i))*zy(i)
    30 continue

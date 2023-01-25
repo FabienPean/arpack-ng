@@ -1,65 +1,65 @@
       program dsbdr4
-c
-c     ... Construct the matrix A in LAPACK-style band form.
-c         The matrix A is the 1-dimensional discrete Laplacian on [0,1]
-c         with zero Dirichlet boundary condition, M is the mass
-c         formed by using piecewise linear elements on [0,1].
-c
-c     ... Call DSBAND  with shift-invert mode to find eigenvalues LAMBDA
-c         closest to SIGMA such that
-c                          A*x = LAMBDA*M*x.
-c
-c     ... Use mode 3 of DSAUPD .
-c
-c\BeginLib
-c
-c\Routines called:
-c     dsband   ARPACK banded eigenproblem solver.
-c     dlapy2   LAPACK routine to compute sqrt(x**2+y**2) carefully.
-c     dlaset   LAPACK routine to initialize a matrix to zero.
-c     daxpy    Level 1 BLAS that computes y <- alpha*x+y.
-c     dnrm2    Level 1 BLAS that computes the norm of a vector.
-c     dgbmv    Level 2 BLAS that computes the band matrix vector product
-c
-c\Author
-c     Richard Lehoucq
-c     Danny Sorensen
-c     Chao Yang
-c     Dept. of Computational &
-c     Applied Mathematics
-c     Rice University
-c     Houston, Texas
-c
-c\SCCS Information: @(#)
-c FILE: sbdr4.F   SID: 2.5   DATE OF SID: 08/26/96   RELEASE: 2
-c
-c\Remarks
-c     1. None
-c
-c\EndLib
-c
-c----------------------------------------------------------------------
-c
-c     %-------------------------------------%
-c     | Define leading dimensions for all   |
-c     | arrays.                             |
-c     | MAXN   - Maximum size of the matrix |
-c     | MAXNEV - Maximum number of          |
-c     |          eigenvalues to be computed |
-c     | MAXNCV - Maximum number of Arnoldi  |
-c     |          vectors stored             |
-c     | MAXBDW - Maximum bandwidth          |
-c     %-------------------------------------%
-c
+!
+!     ... Construct the matrix A in LAPACK-style band form.
+!         The matrix A is the 1-dimensional discrete Laplacian on [0,1]
+!         with zero Dirichlet boundary condition, M is the mass
+!         formed by using piecewise linear elements on [0,1].
+!
+!     ... Call DSBAND  with shift-invert mode to find eigenvalues LAMBDA
+!         closest to SIGMA such that
+!                          A*x = LAMBDA*M*x.
+!
+!     ... Use mode 3 of DSAUPD .
+!
+!\BeginLib
+!
+!\Routines called:
+!     dsband   ARPACK banded eigenproblem solver.
+!     dlapy2   LAPACK routine to compute sqrt(x**2+y**2) carefully.
+!     dlaset   LAPACK routine to initialize a matrix to zero.
+!     daxpy    Level 1 BLAS that computes y <- alpha*x+y.
+!     dnrm2    Level 1 BLAS that computes the norm of a vector.
+!     dgbmv    Level 2 BLAS that computes the band matrix vector product
+!
+!\Author
+!     Richard Lehoucq
+!     Danny Sorensen
+!     Chao Yang
+!     Dept. of Computational &
+!     Applied Mathematics
+!     Rice University
+!     Houston, Texas
+!
+!\SCCS Information: @(#)
+! FILE: sbdr4.F   SID: 2.5   DATE OF SID: 08/26/96   RELEASE: 2
+!
+!\Remarks
+!     1. None
+!
+!\EndLib
+!
+!----------------------------------------------------------------------
+!
+!     %-------------------------------------%
+!     | Define leading dimensions for all   |
+!     | arrays.                             |
+!     | MAXN   - Maximum size of the matrix |
+!     | MAXNEV - Maximum number of          |
+!     |          eigenvalues to be computed |
+!     | MAXNCV - Maximum number of Arnoldi  |
+!     |          vectors stored             |
+!     | MAXBDW - Maximum bandwidth          |
+!     %-------------------------------------%
+!
       integer          maxn, maxnev, maxncv, maxbdw, lda,
      &                 lworkl, ldv
       parameter        ( maxn = 1000, maxnev = 25, maxncv=50,
      &                   maxbdw=50, lda = maxbdw, ldv = maxn )
-c
-c     %--------------%
-c     | Local Arrays |
-c     %--------------%
-c
+!
+!     %--------------%
+!     | Local Arrays |
+!     %--------------%
+!
       integer          iparam(11), iwork(maxn)
       logical          select(maxncv)
       Double precision
@@ -67,55 +67,55 @@ c
      &                 workl(maxncv*maxncv+8*maxncv), workd(3*maxn),
      &                 v(ldv, maxncv), resid(maxn), d(maxncv, 2),
      &                 ax(maxn), mx(maxn)
-c
-c     %---------------%
-c     | Local Scalars |
-c     %---------------%
-c
+!
+!     %---------------%
+!     | Local Scalars |
+!     %---------------%
+!
       character        which*2, bmat
       integer          nev, ncv, ku, kl, info, j, ido,
      &                 n, isub, isup, idiag, maxitr, mode, nconv
       Double precision
      &                 tol, h, sigma, r1, r2
       logical          rvec
-c
-c     %------------%
-c     | Parameters |
-c     %------------%
-c
+!
+!     %------------%
+!     | Parameters |
+!     %------------%
+!
       Double precision
      &                 one, zero, two, four, six
       parameter        (one = 1.0D+0 , zero = 0.0D+0 , two = 2.0D+0 ,
      &                  four = 4.0D+0 , six = 6.0D+0 )
-c
-c     %-----------------------------%
-c     | BLAS & LAPACK routines used |
-c     %-----------------------------%
-c
+!
+!     %-----------------------------%
+!     | BLAS & LAPACK routines used |
+!     %-----------------------------%
+!
       Double precision
      &                  dlapy2 , dnrm2
       external          dlapy2 , dnrm2 , daxpy , dgbmv
-c
-c     %-----------------------%
-c     | Executable Statements |
-c     %-----------------------%
-c
-c     %--------------------------------------------------%
-c     | The number N is the dimension of the matrix.  A  |
-c     | generalized eigenvalue problem is solved         |
-c     | (BMAT = 'G').  NEV is the number of eigenvalues  |
-c     | (closest to the shift SIGMA) to be approximated. |
-c     | Since the shift and invert mode is used, WHICH   |
-c     | is set to 'LM'.  The user can modify N, NEV, NCV |
-c     | and SIGMA to solve problems of different sizes,  |
-c     | and to get different parts the spectrum.         |
-c     | However, the following conditions must be        |
-c     | satisfied:                                       |
-c     |                   N <= MAXN                      |
-c     |                 NEV <= MAXNEV                    |
-c     |           NEV + 1 <= NCV <= MAXNCV               |
-c     %--------------------------------------------------%
-c
+!
+!     %-----------------------%
+!     | Executable Statements |
+!     %-----------------------%
+!
+!     %--------------------------------------------------%
+!     | The number N is the dimension of the matrix.  A  |
+!     | generalized eigenvalue problem is solved         |
+!     | (BMAT = 'G').  NEV is the number of eigenvalues  |
+!     | (closest to the shift SIGMA) to be approximated. |
+!     | Since the shift and invert mode is used, WHICH   |
+!     | is set to 'LM'.  The user can modify N, NEV, NCV |
+!     | and SIGMA to solve problems of different sizes,  |
+!     | and to get different parts the spectrum.         |
+!     | However, the following conditions must be        |
+!     | satisfied:                                       |
+!     |                   N <= MAXN                      |
+!     |                 NEV <= MAXNEV                    |
+!     |           NEV + 1 <= NCV <= MAXNCV               |
+!     %--------------------------------------------------%
+!
       n    = 100
       nev  = 4
       ncv  = 10
@@ -132,63 +132,63 @@ c
       bmat = 'G'
       which = 'LM'
       sigma = zero
-c
-c     %-----------------------------------------------------%
-c     | The work array WORKL is used in DSAUPD  as           |
-c     | workspace.  Its dimension LWORKL is set as          |
-c     | illustrated below.  The parameter TOL determines    |
-c     | the stopping criterion. If TOL<=0, machine          |
-c     | precision is used.  The variable IDO is used for    |
-c     | reverse communication, and is initially set to 0.   |
-c     | Setting INFO=0 indicates that a random vector is    |
-c     | generated in DSAUPD  to start the Arnoldi iteration. |
-c     %-----------------------------------------------------%
-c
+!
+!     %-----------------------------------------------------%
+!     | The work array WORKL is used in DSAUPD  as           |
+!     | workspace.  Its dimension LWORKL is set as          |
+!     | illustrated below.  The parameter TOL determines    |
+!     | the stopping criterion. If TOL<=0, machine          |
+!     | precision is used.  The variable IDO is used for    |
+!     | reverse communication, and is initially set to 0.   |
+!     | Setting INFO=0 indicates that a random vector is    |
+!     | generated in DSAUPD  to start the Arnoldi iteration. |
+!     %-----------------------------------------------------%
+!
       lworkl  = ncv**2+8*ncv
       tol  = zero
       ido  = 0
       info = 0
-c
-c     %---------------------------------------------------%
-c     | IPARAM(3) specifies the maximum number of Arnoldi |
-c     | iterations allowed.  Mode 3 of DSAUPD  is used     |
-c     | (IPARAM(7) = 3). All these options can be changed |
-c     | by the user. For details, see the documentation   |
-c     | in DSBAND .                                        |
-c     %---------------------------------------------------%
-c
+!
+!     %---------------------------------------------------%
+!     | IPARAM(3) specifies the maximum number of Arnoldi |
+!     | iterations allowed.  Mode 3 of DSAUPD  is used     |
+!     | (IPARAM(7) = 3). All these options can be changed |
+!     | by the user. For details, see the documentation   |
+!     | in DSBAND .                                        |
+!     %---------------------------------------------------%
+!
       maxitr = 300
       mode   = 3
-c
+!
       iparam(3) = maxitr
       iparam(7) = mode
-c
-c     %----------------------------------------%
-c     | Construct the matrix A in LAPACK-style |
-c     | banded form.                           |
-c     %----------------------------------------%
-c
-c     %---------------------------------------------%
-c     | Zero out the workspace for banded matrices. |
-c     %---------------------------------------------%
-c
+!
+!     %----------------------------------------%
+!     | Construct the matrix A in LAPACK-style |
+!     | banded form.                           |
+!     %----------------------------------------%
+!
+!     %---------------------------------------------%
+!     | Zero out the workspace for banded matrices. |
+!     %---------------------------------------------%
+!
       call dlaset ('A', lda, n, zero, zero, a, lda)
       call dlaset ('A', lda, n, zero, zero, m, lda)
       call dlaset ('A', lda, n, zero, zero, rfac, lda)
-c
-c     %-------------------------------------%
-c     | KU, KL are number of superdiagonals |
-c     | and subdiagonals within the band of |
-c     | matrices A and M.                   |
-c     %-------------------------------------%
-c
+!
+!     %-------------------------------------%
+!     | KU, KL are number of superdiagonals |
+!     | and subdiagonals within the band of |
+!     | matrices A and M.                   |
+!     %-------------------------------------%
+!
       kl   = 1
       ku   = 1
-c
-c     %---------------%
-c     | Main diagonal |
-c     %---------------%
-c
+!
+!     %---------------%
+!     | Main diagonal |
+!     %---------------%
+!
       h = one / dble (n+1)
       r1 = four / six
       idiag = kl+ku+1
@@ -196,11 +196,11 @@ c
          a(idiag,j) = two / h
          m(idiag,j) = r1 * h
   30  continue
-c
-c     %-------------------------------------%
-c     | First subdiagonal and superdiagonal |
-c     %-------------------------------------%
-c
+!
+!     %-------------------------------------%
+!     | First subdiagonal and superdiagonal |
+!     %-------------------------------------%
+!
       r2 = one / six
       isup = kl+ku
       isub = kl+ku+2
@@ -210,30 +210,30 @@ c
          m(isup,j+1) = r2 * h
          m(isub,j) = r2 * h
   60  continue
-c
-c     %-------------------------------------%
-c     | Call DSBAND  to find eigenvalues and |
-c     | eigenvectors.  Eigenvalues are      |
-c     | returned in the first column of D.  |
-c     | Eigenvectors are returned in the    |
-c     | first NCONV (=IPARAM(5)) columns of |
-c     | V.                                  |
-c     %-------------------------------------%
-c
+!
+!     %-------------------------------------%
+!     | Call DSBAND  to find eigenvalues and |
+!     | eigenvectors.  Eigenvalues are      |
+!     | returned in the first column of D.  |
+!     | Eigenvectors are returned in the    |
+!     | first NCONV (=IPARAM(5)) columns of |
+!     | V.                                  |
+!     %-------------------------------------%
+!
       rvec = .true.
       call dsband ( rvec, 'A', select, d, v, ldv, sigma, n, a, m,
      &             lda, rfac, kl, ku, which, bmat, nev, tol,
      &             resid, ncv, v, ldv, iparam, workd, workl, lworkl,
      &             iwork, info)
-c
+!
       if ( info .eq. 0) then
-c
+!
          nconv = iparam(5)
-c
-c        %-----------------------------------%
-c        | Print out convergence information |
-c        %-----------------------------------%
-c
+!
+!        %-----------------------------------%
+!        | Print out convergence information |
+!        %-----------------------------------%
+!
          print *, ' '
          print *, ' _SBDR4 '
          print *, ' ====== '
@@ -250,12 +250,12 @@ c
          print *, ' The number of OP*x is ', iparam(9)
          print *, ' The convergence tolerance is ', tol
          print *, ' '
-c
-c        %----------------------------%
-c        | Compute the residual norm. |
-c        |    ||  A*x - lambda*x ||   |
-c        %----------------------------%
-c
+!
+!        %----------------------------%
+!        | Compute the residual norm. |
+!        |    ||  A*x - lambda*x ||   |
+!        %----------------------------%
+!
          do 90 j = 1, nconv
             call dgbmv ('Notranspose', n, n, kl, ku, one,
      &                 a(kl+1,1), lda, v(1,j), 1, zero,
@@ -266,24 +266,24 @@ c
             call daxpy (n, -d(j,1), mx, 1, ax, 1)
             d(j,2) = dnrm2 (n, ax, 1)
             d(j,2) = d(j,2) / abs(d(j,1))
-c
+!
  90      continue
 
          call dmout (6, nconv, 2, d, maxncv, -6,
      &             'Ritz values and relative residuals')
       else
-c
-c        %-------------------------------------%
-c        | Either convergence failed, or there |
-c        | is error.  Check the documentation  |
-c        | for DSBAND .                         |
-c        %-------------------------------------%
-c
+!
+!        %-------------------------------------%
+!        | Either convergence failed, or there |
+!        | is error.  Check the documentation  |
+!        | for DSBAND .                         |
+!        %-------------------------------------%
+!
           print *, ' '
           print *, ' Error with _sband, info= ', info
           print *, ' Check the documentation of _sband '
           print *, ' '
-c
+!
       end if
-c
+!
  9000 end

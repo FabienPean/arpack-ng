@@ -1,76 +1,76 @@
       program psntest1
-c
-c     Message Passing Layer: BLACS
-c
-c     Example program to illustrate the idea of reverse communication
-c     for a standard nonsymmetric eigenvalue problem.
-c
-c     We implement example one of ex-nonsym.doc in DOCUMENTS directory
-c
-c\Test-1
-c     ... Suppose we want to solve A*x = lambda*x in regular mode,
-c         where A is random diagonal matrix with 4 separated eigenvalues.
-c     ... OP = A  and  B = I.
-c     ... Assume "call av ( nloc, diag, x, y)" computes y = A*x.
-c     ... Use mode 1 of PDNAUPD.
-c
-c\BeginLib
-c
-c\Routines called:
-c     pdnaupd  Parallel ARPACK reverse communication interface routine.
-c     pdneupd  Parallel ARPACK routine that returns Ritz values and (optionally)
-c              Ritz vectors.
-c     dlapy2   LAPACK routine to compute sqrt(x**2+y**2) carefully.
-c     daxpy    Level 1 BLAS that computes y <- alpha*x+y.
-c     pdnorm2  Parallel version of Level 1 BLAS that computes the norm of a vector.
-c     av       Distributed matrix vector multiplication routine that computes A*x.
-c
-c\Author
-c     Kristi Maschhoff
-c     Dept. of Computational &
-c     Applied Mathematics
-c     Rice University
-c     Houston, Texas
-c
-c\SCCS Information:
-c FILE: %M%   SID: %I%   DATE OF SID: %G%   RELEASE: %R%
-c
-c\Remarks
-c     1. None
-c
-c\EndLib
-c---------------------------------------------------------------------------
-c
+!
+!     Message Passing Layer: BLACS
+!
+!     Example program to illustrate the idea of reverse communication
+!     for a standard nonsymmetric eigenvalue problem.
+!
+!     We implement example one of ex-nonsym.doc in DOCUMENTS directory
+!
+!\Test-1
+!     ... Suppose we want to solve A*x = lambda*x in regular mode,
+!         where A is random diagonal matrix with 4 separated eigenvalues.
+!     ... OP = A  and  B = I.
+!     ... Assume "call av ( nloc, diag, x, y)" computes y = A*x.
+!     ... Use mode 1 of PDNAUPD.
+!
+!\BeginLib
+!
+!\Routines called:
+!     pdnaupd  Parallel ARPACK reverse communication interface routine.
+!     pdneupd  Parallel ARPACK routine that returns Ritz values and (optionally)
+!              Ritz vectors.
+!     dlapy2   LAPACK routine to compute sqrt(x**2+y**2) carefully.
+!     daxpy    Level 1 BLAS that computes y <- alpha*x+y.
+!     pdnorm2  Parallel version of Level 1 BLAS that computes the norm of a vector.
+!     av       Distributed matrix vector multiplication routine that computes A*x.
+!
+!\Author
+!     Kristi Maschhoff
+!     Dept. of Computational &
+!     Applied Mathematics
+!     Rice University
+!     Houston, Texas
+!
+!\SCCS Information:
+! FILE: %M%   SID: %I%   DATE OF SID: %G%   RELEASE: %R%
+!
+!\Remarks
+!     1. None
+!
+!\EndLib
+!---------------------------------------------------------------------------
+!
       include 'debug.h'
       include 'stat.h'
 
-c     %-----------------%
-c     | BLACS INTERFACE |
-c     %-----------------%
-c
+!     %-----------------%
+!     | BLACS INTERFACE |
+!     %-----------------%
+!
       integer           comm, iam, nprocs, nloc,
      &                  nprow, npcol, myprow, mypcol
-c
+!
       external          BLACS_PINFO, BLACS_SETUP, BLACS_GET,
      &                  BLACS_GRIDINIT, BLACS_GRIDINFO
-c
-c     %-----------------------------%
-c     | Define maximum dimensions   |
-c     | for all arrays.             |
-c     | MAXN:   Maximum dimension   |
-c     |         of the distributed  |
-c     |         block of A allowed. |
-c     | MAXNEV: Maximum NEV allowed |
-c     | MAXNCV: Maximum NCV allowed |
-c     %-----------------------------%
-c
+!
+!     %-----------------------------%
+!     | Define maximum dimensions   |
+!     | for all arrays.             |
+!     | MAXN:   Maximum dimension   |
+!     |         of the distributed  |
+!     |         block of A allowed. |
+!     | MAXNEV: Maximum NEV allowed |
+!     | MAXNCV: Maximum NCV allowed |
+!     %-----------------------------%
+!
       integer           maxn, maxnev, maxncv, ldv
       parameter         (maxn=100000, maxnev=12, maxncv=30, ldv=maxn)
-c
-c     %--------------%
-c     | Local Arrays |
-c     %--------------%
-c
+!
+!     %--------------%
+!     | Local Arrays |
+!     %--------------%
+!
       integer           iparam(11), ipntr(14), iseed(4)
       logical           select(maxncv)
       Double precision
@@ -78,48 +78,48 @@ c
      &                  v(ldv,maxncv), workd(3*maxn),
      &                  workev(3*maxncv),
      &                  workl(3*maxncv*maxncv+6*maxncv)
-c
-c     %---------------%
-c     | Local Scalars |
-c     %---------------%
-c
+!
+!     %---------------%
+!     | Local Scalars |
+!     %---------------%
+!
       character         bmat*1, which*2
       integer           ido, n, nx, nev, ncv, lworkl, info, j,
      &                  ierr, nconv, maxitr, ishfts, mode, idist
       Double precision
      &                  tol, sigmar, sigmai
       logical           first, rvec
-c
-c     %------------%
-c     | Parameters |
-c     %------------%
-c
+!
+!     %------------%
+!     | Parameters |
+!     %------------%
+!
       Double precision
      &                  zero, one
       parameter         ( zero = 0.0, one = 1.0 )
-c
-c     %-----------------------------%
-c     | BLAS & LAPACK routines used |
-c     %-----------------------------%
-c
+!
+!     %-----------------------------%
+!     | BLAS & LAPACK routines used |
+!     %-----------------------------%
+!
       Double precision
      &                  dlapy2, pdnorm2
       external          dlapy2, daxpy, pdnorm2, dlarnv
-c
-c     %---------------------%
-c     | Intrinsic Functions |
-c     %---------------------%
-c
+!
+!     %---------------------%
+!     | Intrinsic Functions |
+!     %---------------------%
+!
       intrinsic         abs, sqrt
-c
-c     %-----------------------%
-c     | Executable Statements |
-c     %-----------------------%
-c
+!
+!     %-----------------------%
+!     | Executable Statements |
+!     %-----------------------%
+!
       call BLACS_PINFO( iam, nprocs )
-c
-c     If in PVM, create virtual machine if it doesn't exist
-c
+!
+!     If in PVM, create virtual machine if it doesn't exist
+!
       if (nprocs .lt. 1) then
          if (iam .eq. 0) then
               write(*,1000)
@@ -127,39 +127,39 @@ c
          endif
          call BLACS_SETUP( iam, nprocs )
       endif
-c
+!
 1000  format('How many processes in machine?')
 2000  format(I3)
-c
-c     Set up processors in 1D Grid
-c
+!
+!     Set up processors in 1D Grid
+!
       nprow = nprocs
       npcol = 1
-c
-c     Get default system context, and define grid
-c
+!
+!     Get default system context, and define grid
+!
       call BLACS_GET( 0, 0, comm )
       call BLACS_GRIDINIT( comm, 'Row', nprow, npcol )
       call BLACS_GRIDINFO( comm, nprow, npcol, myprow, mypcol )
-c
-c     If I'm not in grid, go to end of program
-c
+!
+!     If I'm not in grid, go to end of program
+!
       if ( (myprow .ge. nprow) .or. (mypcol .ge. npcol) ) goto 9000
-c
+!
       ndigit = -3
       logfil = 6
       mnaupd = 1
-c
+!
       n     = maxn*nprocs
       nev   = 4
       ncv   = 20
-c
-c     %--------------------------------------%
-c     | Set up distribution of data to nodes |
-c     %--------------------------------------%
-c
+!
+!     %--------------------------------------%
+!     | Set up distribution of data to nodes |
+!     %--------------------------------------%
+!
       nloc = maxn
-c
+!
       if ( nloc .gt. maxn ) then
          print *, ' ERROR with _NDRV1: NLOC is greater than MAXN '
          go to 9000
@@ -172,12 +172,12 @@ c
       end if
       bmat  = 'I'
       which = 'LM'
-c
-c     %-----------------------------------%
-c     | Generate random diagonal matrix   |
-c     | Isolate 4 extreamal eigenvalues   |
-c     %-----------------------------------%
-c
+!
+!     %-----------------------------------%
+!     | Generate random diagonal matrix   |
+!     | Isolate 4 extreamal eigenvalues   |
+!     %-----------------------------------%
+!
       idist = 1
       iseed(1) = 15
       iseed(2) = 35
@@ -188,18 +188,18 @@ c
       diag(2) = diag(2) + 1.01
       diag(3) = diag(3) + 1.01
       diag(4) = diag(4) + 1.01
-c
-c     %-----------------------------------------------------%
-c     | The work array WORKL is used in PDNAUPD as          |
-c     | workspace.  Its dimension LWORKL is set as          |
-c     | illustrated below.  The parameter TOL determines    |
-c     | the stopping criterion. If TOL<=0, machine          |
-c     | precision is used.  The variable IDO is used for    |
-c     | reverse communication, and is initially set to 0.   |
-c     | Setting INFO=0 indicates that a random vector is    |
-c     | generated in PDNAUPD to start the Arnoldi iteration.|
-c     %-----------------------------------------------------%
-c
+!
+!     %-----------------------------------------------------%
+!     | The work array WORKL is used in PDNAUPD as          |
+!     | workspace.  Its dimension LWORKL is set as          |
+!     | illustrated below.  The parameter TOL determines    |
+!     | the stopping criterion. If TOL<=0, machine          |
+!     | precision is used.  The variable IDO is used for    |
+!     | reverse communication, and is initially set to 0.   |
+!     | Setting INFO=0 indicates that a random vector is    |
+!     | generated in PDNAUPD to start the Arnoldi iteration.|
+!     %-----------------------------------------------------%
+!
       lworkl  = 3*ncv**2+6*ncv
       tol    = zero
       ido    = 0
@@ -207,165 +207,165 @@ c
       do 50 j=1,nloc
          resid(j) = 1.0
  50   continue
-c
-c     %---------------------------------------------------%
-c     | This program uses exact shifts with respect to    |
-c     | the current Hessenberg matrix (IPARAM(1) = 1).    |
-c     | IPARAM(3) specifies the maximum number of Arnoldi |
-c     | iterations allowed.  Mode 1 of PDNAUPD is used    |
-c     | (IPARAM(7) = 1). All these options can be changed |
-c     | by the user. For details see the documentation in |
-c     | PDNAUPD.                                          |
-c     %---------------------------------------------------%
-c
+!
+!     %---------------------------------------------------%
+!     | This program uses exact shifts with respect to    |
+!     | the current Hessenberg matrix (IPARAM(1) = 1).    |
+!     | IPARAM(3) specifies the maximum number of Arnoldi |
+!     | iterations allowed.  Mode 1 of PDNAUPD is used    |
+!     | (IPARAM(7) = 1). All these options can be changed |
+!     | by the user. For details see the documentation in |
+!     | PDNAUPD.                                          |
+!     %---------------------------------------------------%
+!
       ishfts = 1
       maxitr = 300
       mode   = 1
-c
+!
       iparam(1) = ishfts
       iparam(3) = maxitr
       iparam(7) = mode
-c
-c     %-------------------------------------------%
-c     | M A I N   L O O P (Reverse communication) |
-c     %-------------------------------------------%
-c
+!
+!     %-------------------------------------------%
+!     | M A I N   L O O P (Reverse communication) |
+!     %-------------------------------------------%
+!
  10   continue
-c
-c        %---------------------------------------------%
-c        | Repeatedly call the routine PDNAUPD and take|
-c        | actions indicated by parameter IDO until    |
-c        | either convergence is indicated or maxitr   |
-c        | has been exceeded.                          |
-c        %---------------------------------------------%
-c
+!
+!        %---------------------------------------------%
+!        | Repeatedly call the routine PDNAUPD and take|
+!        | actions indicated by parameter IDO until    |
+!        | either convergence is indicated or maxitr   |
+!        | has been exceeded.                          |
+!        %---------------------------------------------%
+!
          call pdnaupd(comm, ido, bmat, nloc, which, nev, tol, resid,
      &        ncv, v, ldv, iparam, ipntr, workd, workl, lworkl, info )
-c
+!
          if (ido .eq. -1 .or. ido .eq. 1) then
-c
-c           %-------------------------------------------%
-c           | Perform matrix vector multiplication      |
-c           |                y <--- OP*x                |
-c           | The user should supply his/her own        |
-c           | matrix vector multiplication routine here |
-c           | that takes workd(ipntr(1)) as the input   |
-c           | vector, and return the matrix vector      |
-c           | product to workd(ipntr(2)).               |
-c           %-------------------------------------------%
-c
+!
+!           %-------------------------------------------%
+!           | Perform matrix vector multiplication      |
+!           |                y <--- OP*x                |
+!           | The user should supply his/her own        |
+!           | matrix vector multiplication routine here |
+!           | that takes workd(ipntr(1)) as the input   |
+!           | vector, and return the matrix vector      |
+!           | product to workd(ipntr(2)).               |
+!           %-------------------------------------------%
+!
             call av ( nloc, diag, workd(ipntr(1)), workd(ipntr(2)))
-c
-c           %-----------------------------------------%
-c           | L O O P   B A C K to call PDNAUPD again.|
-c           %-----------------------------------------%
-c
+!
+!           %-----------------------------------------%
+!           | L O O P   B A C K to call PDNAUPD again.|
+!           %-----------------------------------------%
+!
             go to 10
-c
+!
       end if
-c
-c     %----------------------------------------%
-c     | Either we have convergence or there is |
-c     | an error.                              |
-c     %----------------------------------------%
-c
+!
+!     %----------------------------------------%
+!     | Either we have convergence or there is |
+!     | an error.                              |
+!     %----------------------------------------%
+!
       if ( info .lt. 0 ) then
-c
-c        %--------------------------%
-c        | Error message, check the |
-c        | documentation in PDNAUPD.|
-c        %--------------------------%
-c
+!
+!        %--------------------------%
+!        | Error message, check the |
+!        | documentation in PDNAUPD.|
+!        %--------------------------%
+!
          if ( myprow .eq. 0 ) then
             print *, ' '
             print *, ' Error with _naupd, info = ', info
             print *, ' Check the documentation of _naupd'
             print *, ' '
          endif
-c
+!
       else
-c
-c        %-------------------------------------------%
-c        | No fatal errors occurred.                 |
-c        | Post-Process using PDNEUPD.               |
-c        |                                           |
-c        | Computed eigenvalues may be extracted.    |
-c        |                                           |
-c        | Eigenvectors may also be computed now if  |
-c        | desired.  (indicated by rvec = .true.)    |
-c        %-------------------------------------------%
-c
+!
+!        %-------------------------------------------%
+!        | No fatal errors occurred.                 |
+!        | Post-Process using PDNEUPD.               |
+!        |                                           |
+!        | Computed eigenvalues may be extracted.    |
+!        |                                           |
+!        | Eigenvectors may also be computed now if  |
+!        | desired.  (indicated by rvec = .true.)    |
+!        %-------------------------------------------%
+!
          rvec = .true.
-c
+!
          call pdneupd ( comm, rvec, 'A', select, d, d(1,2), v, ldv,
      &        sigmar, sigmai, workev, bmat, nloc, which, nev, tol,
      &        resid, ncv, v, ldv, iparam, ipntr, workd, workl,
      &        lworkl, ierr )
-c
-c        %-----------------------------------------------%
-c        | The real part of the eigenvalue is returned   |
-c        | in the first column of the two dimensional    |
-c        | array D, and the imaginary part is returned   |
-c        | in the second column of D.  The corresponding |
-c        | eigenvectors are returned in the first NEV    |
-c        | columns of the two dimensional array V if     |
-c        | requested.  Otherwise, an orthogonal basis    |
-c        | for the invariant subspace corresponding to   |
-c        | the eigenvalues in D is returned in V.        |
-c        %-----------------------------------------------%
-c
+!
+!        %-----------------------------------------------%
+!        | The real part of the eigenvalue is returned   |
+!        | in the first column of the two dimensional    |
+!        | array D, and the imaginary part is returned   |
+!        | in the second column of D.  The corresponding |
+!        | eigenvectors are returned in the first NEV    |
+!        | columns of the two dimensional array V if     |
+!        | requested.  Otherwise, an orthogonal basis    |
+!        | for the invariant subspace corresponding to   |
+!        | the eigenvalues in D is returned in V.        |
+!        %-----------------------------------------------%
+!
          if ( ierr .ne. 0) then
-c
-c           %------------------------------------%
-c           | Error condition:                   |
-c           | Check the documentation of PDNEUPD.|
-c           %------------------------------------%
-c
+!
+!           %------------------------------------%
+!           | Error condition:                   |
+!           | Check the documentation of PDNEUPD.|
+!           %------------------------------------%
+!
          	if ( myprow .eq. 0 ) then
              	print *, ' '
              	print *, ' Error with _neupd, info = ', ierr
              	print *, ' Check the documentation of _neupd. '
              	print *, ' '
             endif
-c
+!
          else
-c
+!
              first  = .true.
              nconv  = iparam(5)
              do 20 j=1, nconv
-c
-c               %---------------------------%
-c               | Compute the residual norm |
-c               |                           |
-c               |   ||  A*x - lambda*x ||   |
-c               |                           |
-c               | for the NCONV accurately  |
-c               | computed eigenvalues and  |
-c               | eigenvectors.  (iparam(5) |
-c               | indicates how many are    |
-c               | accurate to the requested |
-c               | tolerance)                |
-c               %---------------------------%
-c
+!
+!               %---------------------------%
+!               | Compute the residual norm |
+!               |                           |
+!               |   ||  A*x - lambda*x ||   |
+!               |                           |
+!               | for the NCONV accurately  |
+!               | computed eigenvalues and  |
+!               | eigenvectors.  (iparam(5) |
+!               | indicates how many are    |
+!               | accurate to the requested |
+!               | tolerance)                |
+!               %---------------------------%
+!
                 if (d(j,2) .eq. zero)  then
-c
-c                  %--------------------%
-c                  | Ritz value is real |
-c                  %--------------------%
-c
+!
+!                  %--------------------%
+!                  | Ritz value is real |
+!                  %--------------------%
+!
                    call av( nloc, diag, v(1,j), ax)
                    call daxpy(nloc, -d(j,1), v(1,j), 1, ax, 1)
                    d(j,3) = pdnorm2( comm, nloc, ax, 1)
-c
+!
                 else if (first) then
-c
-c                  %------------------------%
-c                  | Ritz value is complex. |
-c                  | Residual of one Ritz   |
-c                  | value of the conjugate |
-c                  | pair is computed.      |
-c                  %------------------------%
-c
+!
+!                  %------------------------%
+!                  | Ritz value is complex. |
+!                  | Residual of one Ritz   |
+!                  | value of the conjugate |
+!                  | pair is computed.      |
+!                  %------------------------%
+!
                    call av( nloc, diag, v(1,j), ax)
                    call daxpy(nloc, -d(j,1), v(1,j), 1, ax, 1)
                    call daxpy(nloc, d(j,2), v(1,j+1), 1, ax, 1)
@@ -379,21 +379,21 @@ c
                 else
                    first = .true.
                 end if
-c
+!
  20          continue
-c
-c            %-----------------------------%
-c            | Display computed residuals. |
-c            %-----------------------------%
-c
+!
+!            %-----------------------------%
+!            | Display computed residuals. |
+!            %-----------------------------%
+!
              call pdmout(comm, 6, nconv, 3, d, maxncv, -6,
      &            'Ritz values (Real,Imag) and direct residuals')
           end if
-c
-c        %-------------------------------------------%
-c        | Print additional convergence information. |
-c        %-------------------------------------------%
-c
+!
+!        %-------------------------------------------%
+!        | Print additional convergence information. |
+!        %-------------------------------------------%
+!
          if (myprow .eq. 0)then
          if ( info .eq. 1) then
              print *, ' '
@@ -405,7 +405,7 @@ c
      &                  Arnoldi update, try increasing NCV.'
              print *, ' '
          end if
-c
+!
          print *, ' '
          print *, '_NDRV1 '
          print *, '====== '
@@ -423,37 +423,37 @@ c
          print *, ' The number of OP*x is ', iparam(9)
          print *, ' The convergence criterion is ', tol
          print *, ' '
-c
+!
          endif
       end if
-c
-c     %---------------------------%
-c     | Done with program pdndrv1.|
-c     %---------------------------%
-c
+!
+!     %---------------------------%
+!     | Done with program pdndrv1.|
+!     %---------------------------%
+!
  9000 continue
-c
-c     %-------------------------%
-c     | Release resources BLACS |
-c     %-------------------------%
-c
+!
+!     %-------------------------%
+!     | Release resources BLACS |
+!     %-------------------------%
+!
       call BLACS_GRIDEXIT ( comm )
       call BLACS_EXIT(0)
-c
+!
       end
-c
-c==========================================================================
-c
-c     parallel matrix vector subroutine
-c
+!
+!==========================================================================
+!
+!     parallel matrix vector subroutine
+!
       subroutine av (n, diag, v, w)
       integer           n, j
       Double precision
      &                  v(n), w(n), diag(n)
-c
+!
       do 10 j = 1, n
          w(j) = diag(j)*v(j)
   10  continue
-c
+!
       return
       end

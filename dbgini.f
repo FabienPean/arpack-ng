@@ -1,4 +1,4 @@
-c Initialisation of the debug common block to "no debug".
+! Initialisation of the debug common block to "no debug".
       block data dbgini
       common /debug/ logfil, ndigit, mgetv0,
      &     msaupd, msaup2, msaitr, mseigt, msapps, msgets, mseupd,

@@ -1,38 +1,38 @@
-c
-c     %---------------------------------------------%
-c     | Initialize statistic and timing information |
-c     | for nonsymmetric Arnoldi code.              |
-c     %---------------------------------------------%
-c
-c\Author
-c     Danny Sorensen               Phuong Vu
-c     Richard Lehoucq              CRPC / Rice University
-c     Dept. of Computational &     Houston, Texas
-c     Applied Mathematics
-c     Rice University
-c     Houston, Texas
-c
-c\SCCS Information: @(#)
-c FILE: statn.F   SID: 2.4   DATE OF SID: 4/20/96   RELEASE: 2
-c
+!
+!     %---------------------------------------------%
+!     | Initialize statistic and timing information |
+!     | for nonsymmetric Arnoldi code.              |
+!     %---------------------------------------------%
+!
+!\Author
+!     Danny Sorensen               Phuong Vu
+!     Richard Lehoucq              CRPC / Rice University
+!     Dept. of Computational &     Houston, Texas
+!     Applied Mathematics
+!     Rice University
+!     Houston, Texas
+!
+!\SCCS Information: @(#)
+! FILE: statn.F   SID: 2.4   DATE OF SID: 4/20/96   RELEASE: 2
+!
       subroutine sstatn
-c
-c     %--------------------------------%
-c     | See stat.doc for documentation |
-c     %--------------------------------%
-c
+!
+!     %--------------------------------%
+!     | See stat.doc for documentation |
+!     %--------------------------------%
+!
       include   'stat.h'
-c
-c     %-----------------------%
-c     | Executable Statements |
-c     %-----------------------%
-c
+!
+!     %-----------------------%
+!     | Executable Statements |
+!     %-----------------------%
+!
       nopx   = 0
       nbx    = 0
       nrorth = 0
       nitref = 0
       nrstrt = 0
-c
+!
       tnaupd = 0.0E+0
       tnaup2 = 0.0E+0
       tnaitr = 0.0E+0
@@ -43,19 +43,19 @@ c
       titref = 0.0E+0
       tgetv0 = 0.0E+0
       trvec  = 0.0E+0
-c
-c     %----------------------------------------------------%
-c     | User time including reverse communication overhead |
-c     %----------------------------------------------------%
-c
+!
+!     %----------------------------------------------------%
+!     | User time including reverse communication overhead |
+!     %----------------------------------------------------%
+!
       tmvopx = 0.0E+0
       tmvbx  = 0.0E+0
-c
+!
       return
-c
-c
-c     %---------------%
-c     | End of sstatn |
-c     %---------------%
-c
+!
+!
+!     %---------------%
+!     | End of sstatn |
+!     %---------------%
+!
       end

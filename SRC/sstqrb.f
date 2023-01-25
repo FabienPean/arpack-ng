@@ -1,229 +1,229 @@
-c-----------------------------------------------------------------------
-c\BeginDoc
-c
-c\Name: sstqrb
-c
-c\Description:
-c  Computes all eigenvalues and the last component of the eigenvectors
-c  of a symmetric tridiagonal matrix using the implicit QL or QR method.
-c
-c  This is mostly a modification of the LAPACK routine ssteqr.
-c  See Remarks.
-c
-c\Usage:
-c  call sstqrb
-c     ( N, D, E, Z, WORK, INFO )
-c
-c\Arguments
-c  N       Integer.  (INPUT)
-c          The number of rows and columns in the matrix.  N >= 0.
-c
-c  D       Real array, dimension (N).  (INPUT/OUTPUT)
-c          On entry, D contains the diagonal elements of the
-c          tridiagonal matrix.
-c          On exit, D contains the eigenvalues, in ascending order.
-c          If an error exit is made, the eigenvalues are correct
-c          for indices 1,2,...,INFO-1, but they are unordered and
-c          may not be the smallest eigenvalues of the matrix.
-c
-c  E       Real array, dimension (N-1).  (INPUT/OUTPUT)
-c          On entry, E contains the subdiagonal elements of the
-c          tridiagonal matrix in positions 1 through N-1.
-c          On exit, E has been destroyed.
-c
-c  Z       Real array, dimension (N).  (OUTPUT)
-c          On exit, Z contains the last row of the orthonormal
-c          eigenvector matrix of the symmetric tridiagonal matrix.
-c          If an error exit is made, Z contains the last row of the
-c          eigenvector matrix associated with the stored eigenvalues.
-c
-c  WORK    Real array, dimension (max(1,2*N-2)).  (WORKSPACE)
-c          Workspace used in accumulating the transformation for
-c          computing the last components of the eigenvectors.
-c
-c  INFO    Integer.  (OUTPUT)
-c          = 0:  normal return.
-c          < 0:  if INFO = -i, the i-th argument had an illegal value.
-c          > 0:  if INFO = +i, the i-th eigenvalue has not converged
-c                              after a total of  30*N  iterations.
-c
-c\Remarks
-c  1. None.
-c
-c-----------------------------------------------------------------------
-c
-c\BeginLib
-c
-c\Local variables:
-c     xxxxxx  real
-c
-c\Routines called:
-c     saxpy   Level 1 BLAS that computes a vector triad.
-c     scopy   Level 1 BLAS that copies one vector to another.
-c     sswap   Level 1 BLAS that swaps the contents of two vectors.
-c     lsame   LAPACK character comparison routine.
-c     slae2   LAPACK routine that computes the eigenvalues of a 2-by-2
-c             symmetric matrix.
-c     slaev2  LAPACK routine that eigendecomposition of a 2-by-2 symmetric
-c             matrix.
-c     slamch  LAPACK routine that determines machine constants.
-c     slanst  LAPACK routine that computes the norm of a matrix.
-c     slapy2  LAPACK routine to compute sqrt(x**2+y**2) carefully.
-c     slartg  LAPACK Givens rotation construction routine.
-c     slascl  LAPACK routine for careful scaling of a matrix.
-c     slaset  LAPACK matrix initialization routine.
-c     slasr   LAPACK routine that applies an orthogonal transformation to
-c             a matrix.
-c     slasrt  LAPACK sorting routine.
-c     ssteqr  LAPACK routine that computes eigenvalues and eigenvectors
-c             of a symmetric tridiagonal matrix.
-c     xerbla  LAPACK error handler routine.
-c
-c\Authors
-c     Danny Sorensen               Phuong Vu
-c     Richard Lehoucq              CRPC / Rice University
-c     Dept. of Computational &     Houston, Texas
-c     Applied Mathematics
-c     Rice University
-c     Houston, Texas
-c
-c\SCCS Information: @(#)
-c FILE: stqrb.F   SID: 2.5   DATE OF SID: 8/27/96   RELEASE: 2
-c
-c\Remarks
-c     1. Starting with version 2.5, this routine is a modified version
-c        of LAPACK version 2.0 subroutine SSTEQR. No lines are deleted,
-c        only commented out and new lines inserted.
-c        All lines commented out have "c$$$" at the beginning.
-c        Note that the LAPACK version 1.0 subroutine SSTEQR contained
-c        bugs.
-c
-c\EndLib
-c
-c-----------------------------------------------------------------------
-c
+!-----------------------------------------------------------------------
+!\BeginDoc
+!
+!\Name: sstqrb
+!
+!\Description:
+!  Computes all eigenvalues and the last component of the eigenvectors
+!  of a symmetric tridiagonal matrix using the implicit QL or QR method.
+!
+!  This is mostly a modification of the LAPACK routine ssteqr.
+!  See Remarks.
+!
+!\Usage:
+!  call sstqrb
+!     ( N, D, E, Z, WORK, INFO )
+!
+!\Arguments
+!  N       Integer.  (INPUT)
+!          The number of rows and columns in the matrix.  N >= 0.
+!
+!  D       Real array, dimension (N).  (INPUT/OUTPUT)
+!          On entry, D contains the diagonal elements of the
+!          tridiagonal matrix.
+!          On exit, D contains the eigenvalues, in ascending order.
+!          If an error exit is made, the eigenvalues are correct
+!          for indices 1,2,...,INFO-1, but they are unordered and
+!          may not be the smallest eigenvalues of the matrix.
+!
+!  E       Real array, dimension (N-1).  (INPUT/OUTPUT)
+!          On entry, E contains the subdiagonal elements of the
+!          tridiagonal matrix in positions 1 through N-1.
+!          On exit, E has been destroyed.
+!
+!  Z       Real array, dimension (N).  (OUTPUT)
+!          On exit, Z contains the last row of the orthonormal
+!          eigenvector matrix of the symmetric tridiagonal matrix.
+!          If an error exit is made, Z contains the last row of the
+!          eigenvector matrix associated with the stored eigenvalues.
+!
+!  WORK    Real array, dimension (max(1,2*N-2)).  (WORKSPACE)
+!          Workspace used in accumulating the transformation for
+!          computing the last components of the eigenvectors.
+!
+!  INFO    Integer.  (OUTPUT)
+!          = 0:  normal return.
+!          < 0:  if INFO = -i, the i-th argument had an illegal value.
+!          > 0:  if INFO = +i, the i-th eigenvalue has not converged
+!                              after a total of  30*N  iterations.
+!
+!\Remarks
+!  1. None.
+!
+!-----------------------------------------------------------------------
+!
+!\BeginLib
+!
+!\Local variables:
+!     xxxxxx  real
+!
+!\Routines called:
+!     saxpy   Level 1 BLAS that computes a vector triad.
+!     scopy   Level 1 BLAS that copies one vector to another.
+!     sswap   Level 1 BLAS that swaps the contents of two vectors.
+!     lsame   LAPACK character comparison routine.
+!     slae2   LAPACK routine that computes the eigenvalues of a 2-by-2
+!             symmetric matrix.
+!     slaev2  LAPACK routine that eigendecomposition of a 2-by-2 symmetric
+!             matrix.
+!     slamch  LAPACK routine that determines machine constants.
+!     slanst  LAPACK routine that computes the norm of a matrix.
+!     slapy2  LAPACK routine to compute sqrt(x**2+y**2) carefully.
+!     slartg  LAPACK Givens rotation construction routine.
+!     slascl  LAPACK routine for careful scaling of a matrix.
+!     slaset  LAPACK matrix initialization routine.
+!     slasr   LAPACK routine that applies an orthogonal transformation to
+!             a matrix.
+!     slasrt  LAPACK sorting routine.
+!     ssteqr  LAPACK routine that computes eigenvalues and eigenvectors
+!             of a symmetric tridiagonal matrix.
+!     xerbla  LAPACK error handler routine.
+!
+!\Authors
+!     Danny Sorensen               Phuong Vu
+!     Richard Lehoucq              CRPC / Rice University
+!     Dept. of Computational &     Houston, Texas
+!     Applied Mathematics
+!     Rice University
+!     Houston, Texas
+!
+!\SCCS Information: @(#)
+! FILE: stqrb.F   SID: 2.5   DATE OF SID: 8/27/96   RELEASE: 2
+!
+!\Remarks
+!     1. Starting with version 2.5, this routine is a modified version
+!        of LAPACK version 2.0 subroutine SSTEQR. No lines are deleted,
+!        only commented out and new lines inserted.
+!        All lines commented out have "c$$$" at the beginning.
+!        Note that the LAPACK version 1.0 subroutine SSTEQR contained
+!        bugs.
+!
+!\EndLib
+!
+!-----------------------------------------------------------------------
+!
       subroutine sstqrb ( n, d, e, z, work, info )
-c
-c     %------------------%
-c     | Scalar Arguments |
-c     %------------------%
-c
+!
+!     %------------------%
+!     | Scalar Arguments |
+!     %------------------%
+!
       integer    info, n
-c
-c     %-----------------%
-c     | Array Arguments |
-c     %-----------------%
-c
+!
+!     %-----------------%
+!     | Array Arguments |
+!     %-----------------%
+!
       Real
      &           d( n ), e( n-1 ), z( n ), work( 2*n-2 )
-c
-c     .. parameters ..
+!
+!     .. parameters ..
       Real
      &                   zero, one, two, three
       parameter          ( zero = 0.0E+0, one = 1.0E+0,
      &                     two = 2.0E+0, three = 3.0E+0 )
       integer            maxit
       parameter          ( maxit = 30 )
-c     ..
-c     .. local scalars ..
+!     ..
+!     .. local scalars ..
       integer            i, icompz, ii, iscale, j, jtot, k, l, l1, lend,
      &                   lendm1, lendp1, lendsv, lm1, lsv, m, mm, mm1,
      &                   nm1, nmaxit
       Real
      &                   anorm, b, c, eps, eps2, f, g, p, r, rt1, rt2,
      &                   s, safmax, safmin, ssfmax, ssfmin, tst
-c     ..
-c     .. external functions ..
+!     ..
+!     .. external functions ..
       logical            lsame
       Real
      &                   slamch, slanst, slapy2
       external           lsame, slamch, slanst, slapy2
-c     ..
-c     .. external subroutines ..
+!     ..
+!     .. external subroutines ..
       external           slae2, slaev2, slartg, slascl, slaset, slasr,
      &                   slasrt, sswap, xerbla
-c     ..
-c     .. intrinsic functions ..
+!     ..
+!     .. intrinsic functions ..
       intrinsic          abs, max, sign, sqrt
-c     ..
-c     .. executable statements ..
-c
-c     test the input parameters.
-c
+!     ..
+!     .. executable statements ..
+!
+!     test the input parameters.
+!
       info = 0
-c
-c$$$      IF( LSAME( COMPZ, 'N' ) ) THEN
-c$$$         ICOMPZ = 0
-c$$$      ELSE IF( LSAME( COMPZ, 'V' ) ) THEN
-c$$$         ICOMPZ = 1
-c$$$      ELSE IF( LSAME( COMPZ, 'I' ) ) THEN
-c$$$         ICOMPZ = 2
-c$$$      ELSE
-c$$$         ICOMPZ = -1
-c$$$      END IF
-c$$$      IF( ICOMPZ.LT.0 ) THEN
-c$$$         INFO = -1
-c$$$      ELSE IF( N.LT.0 ) THEN
-c$$$         INFO = -2
-c$$$      ELSE IF( ( LDZ.LT.1 ) .OR. ( ICOMPZ.GT.0 .AND. LDZ.LT.MAX( 1,
-c$$$     $         N ) ) ) THEN
-c$$$         INFO = -6
-c$$$      END IF
-c$$$      IF( INFO.NE.0 ) THEN
-c$$$         CALL XERBLA( 'SSTEQR', -INFO )
-c$$$         RETURN
-c$$$      END IF
-c
-c    *** New starting with version 2.5 ***
-c
+!
+!$$$      IF( LSAME( COMPZ, 'N' ) ) THEN
+!$$$         ICOMPZ = 0
+!$$$      ELSE IF( LSAME( COMPZ, 'V' ) ) THEN
+!$$$         ICOMPZ = 1
+!$$$      ELSE IF( LSAME( COMPZ, 'I' ) ) THEN
+!$$$         ICOMPZ = 2
+!$$$      ELSE
+!$$$         ICOMPZ = -1
+!$$$      END IF
+!$$$      IF( ICOMPZ.LT.0 ) THEN
+!$$$         INFO = -1
+!$$$      ELSE IF( N.LT.0 ) THEN
+!$$$         INFO = -2
+!$$$      ELSE IF( ( LDZ.LT.1 ) .OR. ( ICOMPZ.GT.0 .AND. LDZ.LT.MAX( 1,
+!$$$     $         N ) ) ) THEN
+!$$$         INFO = -6
+!$$$      END IF
+!$$$      IF( INFO.NE.0 ) THEN
+!$$$         CALL XERBLA( 'SSTEQR', -INFO )
+!$$$         RETURN
+!$$$      END IF
+!
+!    *** New starting with version 2.5 ***
+!
       icompz = 2
-c    *************************************
-c
-c     quick return if possible
-c
+!    *************************************
+!
+!     quick return if possible
+!
       if( n.eq.0 )
      $   return
-c
+!
       if( n.eq.1 ) then
          if( icompz.eq.2 )  z( 1 ) = one
          return
       end if
-c
-c     determine the unit roundoff and over/underflow thresholds.
-c
+!
+!     determine the unit roundoff and over/underflow thresholds.
+!
       eps = slamch( 'e' )
       eps2 = eps**2
       safmin = slamch( 's' )
       safmax = one / safmin
       ssfmax = sqrt( safmax ) / three
       ssfmin = sqrt( safmin ) / eps2
-c
-c     compute the eigenvalues and eigenvectors of the tridiagonal
-c     matrix.
-c
-c$$      if( icompz.eq.2 )
-c$$$     $   call slaset( 'full', n, n, zero, one, z, ldz )
-c
-c     *** New starting with version 2.5 ***
-c
+!
+!     compute the eigenvalues and eigenvectors of the tridiagonal
+!     matrix.
+!
+!$$      if( icompz.eq.2 )
+!$$$     $   call slaset( 'full', n, n, zero, one, z, ldz )
+!
+!     *** New starting with version 2.5 ***
+!
       if ( icompz .eq. 2 ) then
          do 5 j = 1, n-1
             z(j) = zero
   5      continue
          z( n ) = one
       end if
-c     *************************************
-c
+!     *************************************
+!
       nmaxit = n*maxit
       jtot = 0
-c
-c     determine where the matrix splits and choose ql or qr iteration
-c     for each block, according to whether top or bottom diagonal
-c     element is smaller.
-c
+!
+!     determine where the matrix splits and choose ql or qr iteration
+!     for each block, according to whether top or bottom diagonal
+!     element is smaller.
+!
       l1 = 1
       nm1 = n - 1
-c
+!
    10 continue
       if( l1.gt.n )
      $   go to 160
@@ -242,7 +242,7 @@ c
    20    continue
       end if
       m = n
-c
+!
    30 continue
       l = l1
       lsv = l
@@ -251,9 +251,9 @@ c
       l1 = m + 1
       if( lend.eq.l )
      $   go to 10
-c
-c     scale submatrix in rows and columns l to lend
-c
+!
+!     scale submatrix in rows and columns l to lend
+!
       anorm = slanst( 'i', lend-l+1, d( l ), e( l ) )
       iscale = 0
       if( anorm.eq.zero )
@@ -271,20 +271,20 @@ c
          call slascl( 'g', 0, 0, anorm, ssfmin, lend-l, 1, e( l ), n,
      $                info )
       end if
-c
-c     choose between ql and qr iteration
-c
+!
+!     choose between ql and qr iteration
+!
       if( abs( d( lend ) ).lt.abs( d( l ) ) ) then
          lend = lsv
          l = lendsv
       end if
-c
+!
       if( lend.gt.l ) then
-c
-c        ql iteration
-c
-c        look for small subdiagonal element.
-c
+!
+!        ql iteration
+!
+!        look for small subdiagonal element.
+!
    40    continue
          if( l.ne.lend ) then
             lendm1 = lend - 1
@@ -294,33 +294,33 @@ c
      $             safmin )go to 60
    50       continue
          end if
-c
+!
          m = lend
-c
+!
    60    continue
          if( m.lt.lend )
      $      e( m ) = zero
          p = d( l )
          if( m.eq.l )
      $      go to 80
-c
-c        if remaining matrix is 2-by-2, use slae2 or slaev2
-c        to compute its eigensystem.
-c
+!
+!        if remaining matrix is 2-by-2, use slae2 or slaev2
+!        to compute its eigensystem.
+!
          if( m.eq.l+1 ) then
             if( icompz.gt.0 ) then
                call slaev2( d( l ), e( l ), d( l+1 ), rt1, rt2, c, s )
                work( l ) = c
                work( n-1+l ) = s
-c$$$               call slasr( 'r', 'v', 'b', n, 2, work( l ),
-c$$$     $                     work( n-1+l ), z( 1, l ), ldz )
-c
-c              *** New starting with version 2.5 ***
-c
+!$$$               call slasr( 'r', 'v', 'b', n, 2, work( l ),
+!$$$     $                     work( n-1+l ), z( 1, l ), ldz )
+!
+!              *** New starting with version 2.5 ***
+!
                tst      = z(l+1)
                z(l+1) = c*tst - s*z(l)
                z(l)   = s*tst + c*z(l)
-c              *************************************
+!              *************************************
             else
                call slae2( d( l ), e( l ), d( l+1 ), rt1, rt2 )
             end if
@@ -332,23 +332,23 @@ c              *************************************
      $         go to 40
             go to 140
          end if
-c
+!
          if( jtot.eq.nmaxit )
      $      go to 140
          jtot = jtot + 1
-c
-c        form shift.
-c
+!
+!        form shift.
+!
          g = ( d( l+1 )-p ) / ( two*e( l ) )
          r = slapy2( g, one )
          g = d( m ) - p + ( e( l ) / ( g+sign( r, g ) ) )
-c
+!
          s = one
          c = one
          p = zero
-c
-c        inner loop
-c
+!
+!        inner loop
+!
          mm1 = m - 1
          do 70 i = mm1, l, -1
             f = s*e( i )
@@ -361,50 +361,50 @@ c
             p = s*r
             d( i+1 ) = g + p
             g = c*r - b
-c
-c           if eigenvectors are desired, then save rotations.
-c
+!
+!           if eigenvectors are desired, then save rotations.
+!
             if( icompz.gt.0 ) then
                work( i ) = c
                work( n-1+i ) = -s
             end if
-c
+!
    70    continue
-c
-c        if eigenvectors are desired, then apply saved rotations.
-c
+!
+!        if eigenvectors are desired, then apply saved rotations.
+!
          if( icompz.gt.0 ) then
             mm = m - l + 1
-c$$$            call slasr( 'r', 'v', 'b', n, mm, work( l ), work( n-1+l ),
-c$$$     $                  z( 1, l ), ldz )
-c
-c             *** New starting with version 2.5 ***
-c
+!$$$            call slasr( 'r', 'v', 'b', n, mm, work( l ), work( n-1+l ),
+!$$$     $                  z( 1, l ), ldz )
+!
+!             *** New starting with version 2.5 ***
+!
               call slasr( 'r', 'v', 'b', 1, mm, work( l ),
      &                    work( n-1+l ), z( l ), 1 )
-c             *************************************
+!             *************************************
          end if
-c
+!
          d( l ) = d( l ) - p
          e( l ) = g
          go to 40
-c
-c        eigenvalue found.
-c
+!
+!        eigenvalue found.
+!
    80    continue
          d( l ) = p
-c
+!
          l = l + 1
          if( l.le.lend )
      $      go to 40
          go to 140
-c
+!
       else
-c
-c        qr iteration
-c
-c        look for small superdiagonal element.
-c
+!
+!        qr iteration
+!
+!        look for small superdiagonal element.
+!
    90    continue
          if( l.ne.lend ) then
             lendp1 = lend + 1
@@ -414,33 +414,33 @@ c
      $             safmin )go to 110
   100       continue
          end if
-c
+!
          m = lend
-c
+!
   110    continue
          if( m.gt.lend )
      $      e( m-1 ) = zero
          p = d( l )
          if( m.eq.l )
      $      go to 130
-c
-c        if remaining matrix is 2-by-2, use slae2 or slaev2
-c        to compute its eigensystem.
-c
+!
+!        if remaining matrix is 2-by-2, use slae2 or slaev2
+!        to compute its eigensystem.
+!
          if( m.eq.l-1 ) then
             if( icompz.gt.0 ) then
                call slaev2( d( l-1 ), e( l-1 ), d( l ), rt1, rt2, c, s )
-c$$$               work( m ) = c
-c$$$               work( n-1+m ) = s
-c$$$               call slasr( 'r', 'v', 'f', n, 2, work( m ),
-c$$$     $                     work( n-1+m ), z( 1, l-1 ), ldz )
-c
-c               *** New starting with version 2.5 ***
-c
+!$$$               work( m ) = c
+!$$$               work( n-1+m ) = s
+!$$$               call slasr( 'r', 'v', 'f', n, 2, work( m ),
+!$$$     $                     work( n-1+m ), z( 1, l-1 ), ldz )
+!
+!               *** New starting with version 2.5 ***
+!
                 tst      = z(l)
                 z(l)   = c*tst - s*z(l-1)
                 z(l-1) = s*tst + c*z(l-1)
-c               *************************************
+!               *************************************
             else
                call slae2( d( l-1 ), e( l-1 ), d( l ), rt1, rt2 )
             end if
@@ -452,23 +452,23 @@ c               *************************************
      $         go to 90
             go to 140
          end if
-c
+!
          if( jtot.eq.nmaxit )
      $      go to 140
          jtot = jtot + 1
-c
-c        form shift.
-c
+!
+!        form shift.
+!
          g = ( d( l-1 )-p ) / ( two*e( l-1 ) )
          r = slapy2( g, one )
          g = d( m ) - p + ( e( l-1 ) / ( g+sign( r, g ) ) )
-c
+!
          s = one
          c = one
          p = zero
-c
-c        inner loop
-c
+!
+!        inner loop
+!
          lm1 = l - 1
          do 120 i = m, lm1
             f = s*e( i )
@@ -481,48 +481,48 @@ c
             p = s*r
             d( i ) = g + p
             g = c*r - b
-c
-c           if eigenvectors are desired, then save rotations.
-c
+!
+!           if eigenvectors are desired, then save rotations.
+!
             if( icompz.gt.0 ) then
                work( i ) = c
                work( n-1+i ) = s
             end if
-c
+!
   120    continue
-c
-c        if eigenvectors are desired, then apply saved rotations.
-c
+!
+!        if eigenvectors are desired, then apply saved rotations.
+!
          if( icompz.gt.0 ) then
             mm = l - m + 1
-c$$$            call slasr( 'r', 'v', 'f', n, mm, work( m ), work( n-1+m ),
-c$$$     $                  z( 1, m ), ldz )
-c
-c           *** New starting with version 2.5 ***
-c
+!$$$            call slasr( 'r', 'v', 'f', n, mm, work( m ), work( n-1+m ),
+!$$$     $                  z( 1, m ), ldz )
+!
+!           *** New starting with version 2.5 ***
+!
             call slasr( 'r', 'v', 'f', 1, mm, work( m ), work( n-1+m ),
      &                  z( m ), 1 )
-c           *************************************
+!           *************************************
          end if
-c
+!
          d( l ) = d( l ) - p
          e( lm1 ) = g
          go to 90
-c
-c        eigenvalue found.
-c
+!
+!        eigenvalue found.
+!
   130    continue
          d( l ) = p
-c
+!
          l = l - 1
          if( l.ge.lend )
      $      go to 90
          go to 140
-c
+!
       end if
-c
-c     undo scaling if necessary
-c
+!
+!     undo scaling if necessary
+!
   140 continue
       if( iscale.eq.1 ) then
          call slascl( 'g', 0, 0, ssfmax, anorm, lendsv-lsv+1, 1,
@@ -535,10 +535,10 @@ c
          call slascl( 'g', 0, 0, ssfmin, anorm, lendsv-lsv, 1, e( lsv ),
      $                n, info )
       end if
-c
-c     check for no convergence to an eigenvalue after a total
-c     of n*maxit iterations.
-c
+!
+!     check for no convergence to an eigenvalue after a total
+!     of n*maxit iterations.
+!
       if( jtot.lt.nmaxit )
      $   go to 10
       do 150 i = 1, n - 1
@@ -546,20 +546,20 @@ c
      $      info = info + 1
   150 continue
       go to 190
-c
-c     order eigenvalues and eigenvectors.
-c
+!
+!     order eigenvalues and eigenvectors.
+!
   160 continue
       if( icompz.eq.0 ) then
-c
-c        use quick sort
-c
+!
+!        use quick sort
+!
          call slasrt( 'i', n, d, info )
-c
+!
       else
-c
-c        use selection sort to minimize swaps of eigenvectors
-c
+!
+!        use selection sort to minimize swaps of eigenvectors
+!
          do 180 ii = 2, n
             i = ii - 1
             k = i
@@ -573,22 +573,22 @@ c
             if( k.ne.i ) then
                d( k ) = d( i )
                d( i ) = p
-c$$$               call sswap( n, z( 1, i ), 1, z( 1, k ), 1 )
-c           *** New starting with version 2.5 ***
-c
+!$$$               call sswap( n, z( 1, i ), 1, z( 1, k ), 1 )
+!           *** New starting with version 2.5 ***
+!
                p    = z(k)
                z(k) = z(i)
                z(i) = p
-c           *************************************
+!           *************************************
             end if
   180    continue
       end if
-c
+!
   190 continue
       return
-c
-c     %---------------%
-c     | End of sstqrb |
-c     %---------------%
-c
+!
+!     %---------------%
+!     | End of sstqrb |
+!     %---------------%
+!
       end

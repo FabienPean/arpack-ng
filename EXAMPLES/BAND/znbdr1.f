@@ -1,67 +1,67 @@
       program znbdr1
-c
-c     ... Construct the matrix A in LAPACK-style band form.
-c         The matrix A is derived from the discretization of
-c         the 2-d convection-diffusion operator
-c
-c              -Laplacian(u) + rho*partial(u)/partial(x).
-c
-c         on the unit square with zero Dirichlet boundary condition
-c         using standard central difference.
-c
-c     ... Call ZNBAND  to find eigenvalues LAMBDA such that
-c                          A*x = x*LAMBDA.
-c
-c     ... Use mode 1 of ZNAUPD .
-c
-c\BeginLib
-c
-c     znband   ARPACK banded eigenproblem solver.
-c     dlapy2   LAPACK routine to compute sqrt(x**2+y**2) carefully.
-c     zlaset   LAPACK routine to initialize a matrix to zero.
-c     zaxpy    Level 1 BLAS that computes y <- alpha*x+y.
-c     dznrm2   Level 1 BLAS that computes the norm of a vector.
-c     zgbmv    Level 2 BLAS that computes the band matrix vector product
-c
-c\Author
-c     Richard Lehoucq
-c     Danny Sorensen
-c     Chao Yang
-c     Dept. of Computational &
-c     Applied Mathematics
-c     Rice University
-c     Houston, Texas
-c
-c\SCCS Information: @(#)
-c FILE: nbdr1.F   SID: 2.3   DATE OF SID: 08/26/96   RELEASE: 2
-c
-c\Remarks
-c     1. None
-c
-c\EndLib
-c
-c----------------------------------------------------------------------
-c
-c     %-------------------------------------%
-c     | Define leading dimensions for all   |
-c     | arrays.                             |
-c     | MAXN   - Maximum size of the matrix |
-c     | MAXNEV - Maximum number of          |
-c     |          eigenvalues to be computed |
-c     | MAXNCV - Maximum number of Arnoldi  |
-c     |          vectors stored             |
-c     | MAXBDW - Maximum bandwidth          |
-c     %-------------------------------------%
-c
+!
+!     ... Construct the matrix A in LAPACK-style band form.
+!         The matrix A is derived from the discretization of
+!         the 2-d convection-diffusion operator
+!
+!              -Laplacian(u) + rho*partial(u)/partial(x).
+!
+!         on the unit square with zero Dirichlet boundary condition
+!         using standard central difference.
+!
+!     ... Call ZNBAND  to find eigenvalues LAMBDA such that
+!                          A*x = x*LAMBDA.
+!
+!     ... Use mode 1 of ZNAUPD .
+!
+!\BeginLib
+!
+!     znband   ARPACK banded eigenproblem solver.
+!     dlapy2   LAPACK routine to compute sqrt(x**2+y**2) carefully.
+!     zlaset   LAPACK routine to initialize a matrix to zero.
+!     zaxpy    Level 1 BLAS that computes y <- alpha*x+y.
+!     dznrm2   Level 1 BLAS that computes the norm of a vector.
+!     zgbmv    Level 2 BLAS that computes the band matrix vector product
+!
+!\Author
+!     Richard Lehoucq
+!     Danny Sorensen
+!     Chao Yang
+!     Dept. of Computational &
+!     Applied Mathematics
+!     Rice University
+!     Houston, Texas
+!
+!\SCCS Information: @(#)
+! FILE: nbdr1.F   SID: 2.3   DATE OF SID: 08/26/96   RELEASE: 2
+!
+!\Remarks
+!     1. None
+!
+!\EndLib
+!
+!----------------------------------------------------------------------
+!
+!     %-------------------------------------%
+!     | Define leading dimensions for all   |
+!     | arrays.                             |
+!     | MAXN   - Maximum size of the matrix |
+!     | MAXNEV - Maximum number of          |
+!     |          eigenvalues to be computed |
+!     | MAXNCV - Maximum number of Arnoldi  |
+!     |          vectors stored             |
+!     | MAXBDW - Maximum bandwidth          |
+!     %-------------------------------------%
+!
       integer          maxn, maxnev, maxncv, maxbdw, lda,
      &                 lworkl, ldv
       parameter        ( maxn = 1000, maxnev = 25, maxncv=50,
      &                   maxbdw=50, lda = maxbdw, ldv = maxn )
-c
-c     %--------------%
-c     | Local Arrays |
-c     %--------------%
-c
+!
+!     %--------------%
+!     | Local Arrays |
+!     %--------------%
+!
       integer          iparam(11), iwork(maxn)
       logical          select(maxncv)
       Complex*16
@@ -71,11 +71,11 @@ c
      &                 resid(maxn), d(maxncv), ax(maxn)
       Double precision
      &                 rwork(maxn), rd(maxncv,3)
-c
-c     %---------------%
-c     | Local Scalars |
-c     %---------------%
-c
+!
+!     %---------------%
+!     | Local Scalars |
+!     %---------------%
+!
       character        which*2, bmat
       integer          nev, ncv, kl, ku, info, i, j,
      &                 n, nx, lo, isub, isup, idiag, maxitr, mode,
@@ -85,47 +85,47 @@ c
      &                 tol
       Complex*16
      &                 rho, h, h2, sigma
-c
-c     %------------%
-c     | Parameters |
-c     %------------%
-c
+!
+!     %------------%
+!     | Parameters |
+!     %------------%
+!
       Complex*16
      &                 one, zero, two
       parameter        ( one = (1.0D+0, 0.0D+0) ,
      &                   zero = (0.0D+0, 0.0D+0) ,
      &                   two = (2.0D+0, 0.0D+0)  )
-c
-c     %-----------------------------%
-c     | BLAS & LAPACK routines used |
-c     %-----------------------------%
-c
+!
+!     %-----------------------------%
+!     | BLAS & LAPACK routines used |
+!     %-----------------------------%
+!
       Double precision
      &                  dznrm2 , dlapy2
       external          dznrm2 , zgbmv , zaxpy , dlapy2 , zlaset
-c
-c     %-----------------------%
-c     | Executable Statements |
-c     %-----------------------%
-c
-c     %-------------------------------------------------%
-c     | The number NX is the number of interior points  |
-c     | in the discretization of the 2-dimensional      |
-c     | convection-diffusion operator on the unit       |
-c     | square with zero Dirichlet boundary condition.  |
-c     | The number N(=NX*NX) is the dimension of the    |
-c     | matrix.  A standard eigenvalue problem is       |
-c     | solved (BMAT = 'I').  NEV is the number of      |
-c     | eigenvalues to be approximated. The user can    |
-c     | modify NX, NEV, NCV and WHICH to solve problems |
-c     | of different sizes, and to get different parts  |
-c     | the spectrum.  However, the following           |
-c     | conditions must be satisfied:                   |
-c     |                   N <= MAXN                     |
-c     |                 NEV <= MAXNEV                   |
-c     |           NEV + 2 <= NCV <= MAXNCV              |
-c     %-------------------------------------------------%
-c
+!
+!     %-----------------------%
+!     | Executable Statements |
+!     %-----------------------%
+!
+!     %-------------------------------------------------%
+!     | The number NX is the number of interior points  |
+!     | in the discretization of the 2-dimensional      |
+!     | convection-diffusion operator on the unit       |
+!     | square with zero Dirichlet boundary condition.  |
+!     | The number N(=NX*NX) is the dimension of the    |
+!     | matrix.  A standard eigenvalue problem is       |
+!     | solved (BMAT = 'I').  NEV is the number of      |
+!     | eigenvalues to be approximated. The user can    |
+!     | modify NX, NEV, NCV and WHICH to solve problems |
+!     | of different sizes, and to get different parts  |
+!     | the spectrum.  However, the following           |
+!     | conditions must be satisfied:                   |
+!     |                   N <= MAXN                     |
+!     |                 NEV <= MAXNEV                   |
+!     |           NEV + 2 <= NCV <= MAXNCV              |
+!     %-------------------------------------------------%
+!
       nx  = 10
       n    = nx*nx
       nev  = 4
@@ -142,73 +142,73 @@ c
       end if
       bmat = 'I'
       which = 'LM'
-c
-c     %-----------------------------------------------------%
-c     | The work array WORKL is used in ZNAUPD  as           |
-c     | workspace.  Its dimension LWORKL is set as          |
-c     | illustrated below.  The parameter TOL determines    |
-c     | the stopping criterion. If TOL<=0, machine          |
-c     | precision is used.  Setting INFO=0 indicates that a |
-c     | random vector is generated in ZNAUPD  to start the   |
-c     | Arnoldi iteration.                                  |
-c     %-----------------------------------------------------%
-c
+!
+!     %-----------------------------------------------------%
+!     | The work array WORKL is used in ZNAUPD  as           |
+!     | workspace.  Its dimension LWORKL is set as          |
+!     | illustrated below.  The parameter TOL determines    |
+!     | the stopping criterion. If TOL<=0, machine          |
+!     | precision is used.  Setting INFO=0 indicates that a |
+!     | random vector is generated in ZNAUPD  to start the   |
+!     | Arnoldi iteration.                                  |
+!     %-----------------------------------------------------%
+!
       lworkl  = 3*ncv**2+5*ncv
       tol  = 0.0
       info = 0
-c
-c     %---------------------------------------------------%
-c     | IPARAM(3) specifies the maximum number of Arnoldi |
-c     | iterations allowed.  Mode 1 of ZNAUPD  is used     |
-c     | (IPARAM(7) = 1). All these options can be changed |
-c     | by the user. For details, see the documentation   |
-c     | in znband .                                        |
-c     %---------------------------------------------------%
-c
+!
+!     %---------------------------------------------------%
+!     | IPARAM(3) specifies the maximum number of Arnoldi |
+!     | iterations allowed.  Mode 1 of ZNAUPD  is used     |
+!     | (IPARAM(7) = 1). All these options can be changed |
+!     | by the user. For details, see the documentation   |
+!     | in znband .                                        |
+!     %---------------------------------------------------%
+!
       maxitr = 300
       mode   = 1
-c
+!
       iparam(3) = maxitr
       iparam(7) = mode
-c
-c     %----------------------------------------%
-c     | Construct the matrix A in LAPACK-style |
-c     | banded form.                           |
-c     %----------------------------------------%
-c
-c     %---------------------------------------------%
-c     | Zero out the workspace for banded matrices. |
-c     %---------------------------------------------%
-c
+!
+!     %----------------------------------------%
+!     | Construct the matrix A in LAPACK-style |
+!     | banded form.                           |
+!     %----------------------------------------%
+!
+!     %---------------------------------------------%
+!     | Zero out the workspace for banded matrices. |
+!     %---------------------------------------------%
+!
       call zlaset ('A', lda, n, zero, zero, a, lda)
       call zlaset ('A', lda, n, zero, zero, m, lda)
       call zlaset ('A', lda, n, zero, zero, fac, lda)
-c
-c     %-------------------------------------%
-c     | KU, KL are number of superdiagonals |
-c     | and subdiagonals within the band of |
-c     | matrices A and M.                   |
-c     %-------------------------------------%
-c
+!
+!     %-------------------------------------%
+!     | KU, KL are number of superdiagonals |
+!     | and subdiagonals within the band of |
+!     | matrices A and M.                   |
+!     %-------------------------------------%
+!
       kl   = nx
       ku   = nx
-c
-c     %---------------%
-c     | Main diagonal |
-c     %---------------%
-c
+!
+!     %---------------%
+!     | Main diagonal |
+!     %---------------%
+!
       h = one / dcmplx (nx+1)
       h2 = h*h
-c
+!
       idiag = kl+ku+1
       do 30 j = 1, n
          a(idiag,j) = (4.0D+0, 0.0D+0)  / h2
   30  continue
-c
-c     %-------------------------------------%
-c     | First subdiagonal and superdiagonal |
-c     %-------------------------------------%
-c
+!
+!     %-------------------------------------%
+!     | First subdiagonal and superdiagonal |
+!     %-------------------------------------%
+!
       rho = (1.0D+2, 0.0D+0)
       isup = kl+ku
       isub = kl+ku+2
@@ -219,12 +219,12 @@ c
            a(isub,j) = -one/h2 - rho/two/h
   40    continue
   50  continue
-c
-c     %------------------------------------%
-c     | KL-th subdiagonal and KU-th super- |
-c     | diagonal.                          |
-c     %------------------------------------%
-c
+!
+!     %------------------------------------%
+!     | KL-th subdiagonal and KU-th super- |
+!     | diagonal.                          |
+!     %------------------------------------%
+!
       isup = kl+1
       isub = 2*kl+ku+1
       do 80 i = 1, nx-1
@@ -234,29 +234,29 @@ c
             a(isub,j) = -one / h2
  70      continue
  80   continue
-c
-c     %-----------------------------------------------%
-c     | Call ARPACK banded solver to find eigenvalues |
-c     | and eigenvectors. Eigenvalues are returned in |
-c     | the one dimensional array D.  Eigenvectors    |
-c     | are returned in the first NCONV (=IPARAM(5))  |
-c     | columns of V.                                 |
-c     %-----------------------------------------------%
-c
+!
+!     %-----------------------------------------------%
+!     | Call ARPACK banded solver to find eigenvalues |
+!     | and eigenvectors. Eigenvalues are returned in |
+!     | the one dimensional array D.  Eigenvectors    |
+!     | are returned in the first NCONV (=IPARAM(5))  |
+!     | columns of V.                                 |
+!     %-----------------------------------------------%
+!
       rvec = .true.
       call znband (rvec, 'A', select, d, v, ldv, sigma,
      &           workev, n, a, m, lda, fac, kl, ku, which,
      &           bmat, nev, tol, resid, ncv, v, ldv, iparam,
      &           workd, workl, lworkl, rwork, iwork, info)
-c
+!
       if ( info .eq. 0) then
-c
+!
          nconv = iparam(5)
-c
-c        %-----------------------------------%
-c        | Print out convergence information |
-c        %-----------------------------------%
-c
+!
+!        %-----------------------------------%
+!        | Print out convergence information |
+!        %-----------------------------------%
+!
          print *, ' '
          print *, '_NBDR1 '
          print *, '====== '
@@ -273,19 +273,19 @@ c
          print *, ' The number of OP*x is ', iparam(9)
          print *, ' The convergence tolerance is ', tol
          print *, ' '
-c
-c        %----------------------------%
-c        | Compute the residual norm. |
-c        |    ||  A*x - lambda*x ||   |
-c        %----------------------------%
-c
+!
+!        %----------------------------%
+!        | Compute the residual norm. |
+!        |    ||  A*x - lambda*x ||   |
+!        %----------------------------%
+!
          do 90 j = 1, nconv
-c
-c           %---------------------------%
-c           | Compute the residual norm |
-c           |   ||  A*x - lambda*x ||   |
-c           %---------------------------%
-c
+!
+!           %---------------------------%
+!           | Compute the residual norm |
+!           |   ||  A*x - lambda*x ||   |
+!           %---------------------------%
+!
             call zgbmv ('Notranspose', n, n, kl, ku, one,
      &                 a(kl+1,1), lda, v(1,j), 1, zero,
      &                 ax, 1)
@@ -299,18 +299,18 @@ c
          call dmout (6, nconv, 3, rd, maxncv, -6,
      &             'Ritz values (Real,Imag) and relative residuals')
       else
-c
-c        %-------------------------------------%
-c        | Either convergence failed, or there |
-c        | is error.  Check the documentation  |
-c        | for znband .                         |
-c        %-------------------------------------%
-c
+!
+!        %-------------------------------------%
+!        | Either convergence failed, or there |
+!        | is error.  Check the documentation  |
+!        | for znband .                         |
+!        %-------------------------------------%
+!
           print *, ' '
           print *, ' Error with _nband, info= ', info
           print *, ' Check the documentation of _nband '
           print *, ' '
-c
+!
       end if
-c
+!
  9000 end

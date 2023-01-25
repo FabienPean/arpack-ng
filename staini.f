@@ -1,4 +1,4 @@
-c     Initialisation of the stat common block.
+!     Initialisation of the stat common block.
       block data staini
       common /timing/
      &     nopx, nbx, nrorth, nitref, nrstrt,
