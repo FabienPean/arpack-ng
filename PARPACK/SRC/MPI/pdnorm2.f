@@ -19,7 +19,7 @@
 !
       Double precision function pdnorm2 ( comm, n, x, inc )
 !
-      include   'mpif.h'
+      use mpi
 !
 !     %---------------%
 !     | MPI Variables |

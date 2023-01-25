@@ -50,7 +50,7 @@
 !
       subroutine pslarnv( comm, idist, iseed, n, x )
 !
-      include  'mpif.h'
+      use mpi
 !
 !     .. MPI VARIABLES AND FUNCTIONS ..
       integer   comm

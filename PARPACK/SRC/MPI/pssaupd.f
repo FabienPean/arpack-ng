@@ -417,7 +417,7 @@
      &   ( comm, ido, bmat, n, which, nev, tol, resid, ncv, v, ldv,
      &     iparam, ipntr, workd, workl, lworkl, info )
 !
-      include  'mpif.h'
+      use mpi
       include   'pcontext.h'
 !
 !     %------------------%

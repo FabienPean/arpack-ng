@@ -140,7 +140,7 @@
 !     | MPI Communicator |
 !     %--------------------%
 !
-      include  'mpif.h'
+      use mpi
       include  'pcontext.h'
       integer   comm
 !

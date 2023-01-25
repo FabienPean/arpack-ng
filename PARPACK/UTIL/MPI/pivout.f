@@ -20,7 +20,7 @@
 *
       SUBROUTINE PIVOUT (COMM, LOUT, N, IX, IDIGIT, IFMT)
 *
-      include  'mpif.h'
+      use mpi
 *
 *     .. MPI VARIABLES AND FUNCTIONS ..
 *     .. Variable Declaration ..

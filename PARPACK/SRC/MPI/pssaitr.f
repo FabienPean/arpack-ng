@@ -215,7 +215,7 @@
      &    ipntr, workd, workl, info)
 !
       include   'pcontext.h'
-      include   'mpif.h'
+      use mpi
 !
 !     %---------------%
 !     | MPI Variables |

@@ -56,7 +56,7 @@
 !\EndLib
 !---------------------------------------------------------------------------
 !
-      include 'mpif.h'
+      use mpi
       include 'debug.h'
       include 'stat.h'
 !
@@ -432,7 +432,7 @@
       subroutine av (comm, nloc, nx, mv_buf, v, w )
 !
 !     .. MPI Declarations ...
-      include           'mpif.h'
+      use mpi
       integer*4         comm, nprocs, myid, ierr,
      &                  status(MPI_STATUS_SIZE)
 !

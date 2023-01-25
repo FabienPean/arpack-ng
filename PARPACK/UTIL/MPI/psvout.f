@@ -20,7 +20,7 @@
 *
       SUBROUTINE PSVOUT( COMM , LOUT, N, SX, IDIGIT, IFMT )
 *     ...
-      include  'mpif.h'
+      use mpi
 *
 *     .. MPI VARIABLES AND FUNCTIONS ..
 *     .. Variable Declaration ..

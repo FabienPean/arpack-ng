@@ -2,7 +2,7 @@
 !----------- Example to reproduce issue#46 ----------------------------------------------
 !
       program issue46
-      include 'mpif.h'
+      use mpi
 !     %-------------------------------%
 !     | MPI INTERFACE                 |
 !     | ILP64 is not supported by MPI |
@@ -33,7 +33,7 @@
 
 
       subroutine parnoldi(comm)
-      include 'mpif.h'
+      use mpi
       include 'debug.h'
       include 'stat.h'
 
@@ -396,7 +396,7 @@
       subroutine av (comm, nloc, nx, mv_buf, v, w)
 !
 !     .. MPI Declarations ...
-      include           'mpif.h'
+      use mpi
       integer*4         comm, nprocs, myid, ierr,
      &                  status(MPI_STATUS_SIZE)
       integer           nloc, nx, np, j, lo, next, prev

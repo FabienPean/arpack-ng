@@ -23,7 +23,7 @@
 *
       SUBROUTINE PCMOUT( COMM, LOUT, M, N, A, LDA, IDIGIT, IFMT )
 *     ...
-      include  'mpif.h'
+      use mpi
 *
 *     .. MPI VARIABLES AND FUNCTIONS ..
 *     .. Variable Declaration ..

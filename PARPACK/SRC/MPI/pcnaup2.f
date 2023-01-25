@@ -170,7 +170,7 @@
      &     ishift, mxiter, v, ldv, h, ldh, ritz, bounds,
      &     q, ldq, workl, ipntr, workd, rwork, info )
 !
-      include   'mpif.h'
+      use mpi
 !
 !     %---------------%
 !     | MPI Variables |

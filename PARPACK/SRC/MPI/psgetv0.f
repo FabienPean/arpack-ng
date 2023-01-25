@@ -132,7 +132,7 @@
      &   ( comm, ido, bmat, itry, initv, n, j, v, ldv, resid, rnorm,
      &     ipntr, workd, workl, ierr )
 !
-      include   'mpif.h'
+      use mpi
 !
 !     %---------------%
 !     | MPI Variables |

@@ -19,7 +19,7 @@
 *
       SUBROUTINE PZVOUT( COMM, LOUT, N, CX, IDIGIT, IFMT )
 *     ...
-      include  'mpif.h'
+      use mpi
 *
 *     .. MPI VARIABLES AND FUNCTIONS ..
 *     .. Variable Declaration ..

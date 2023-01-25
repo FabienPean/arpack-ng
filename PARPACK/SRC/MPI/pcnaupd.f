@@ -390,7 +390,7 @@
      &     iparam, ipntr, workd, workl, lworkl, rwork, info )
 !
       include  'pcontext.h'
-      include  'mpif.h'
+      use mpi
 !
 !     %------------------%
 !     | MPI Variables    |
