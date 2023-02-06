@@ -401,7 +401,7 @@ set_target_properties(arpack PROPERTIES SOVERSION 2)
 target_include_directories(arpack
   PUBLIC
   # Exported location of headers
-  $<INSTALL_INTERFACE:${ARPACK_INSTALL_INCLUDEDIR}>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   # Find arpackdef.h, arpackicb.h, stat*.h, debug*.h at build time
   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
