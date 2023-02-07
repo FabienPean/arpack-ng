@@ -385,29 +385,34 @@ if (MPI)
 endif()
 
 # use -DBUILD_SHARED_LIBS=ON|OFF to control static/shared
-add_library(arpack ${arpackutil_STAT_SRCS} ${arpacksrc_STAT_SRCS} ${arpacksrc_ICB})
+add_library(arpackng ${arpackutil_STAT_SRCS} ${arpacksrc_STAT_SRCS} ${arpacksrc_ICB})
 
-target_link_libraries(arpack
+target_link_libraries(arpackng
   PUBLIC
   $<INSTALL_INTERFACE:$<IF:$<BOOL:${BUILD_SHARED_LIBS}>,,LAPACK::LAPACK>>
   $<INSTALL_INTERFACE:$<IF:$<BOOL:${BUILD_SHARED_LIBS}>,,BLAS::BLAS>>
   $<BUILD_INTERFACE:LAPACK::LAPACK>
   $<BUILD_INTERFACE:BLAS::BLAS>
 )
-target_link_options(arpack PUBLIC "${EXTRA_LDFLAGS}")
-set_target_properties(arpack PROPERTIES OUTPUT_NAME arpack${LIBSUFFIX}${ITF64SUFFIX})
-set_target_properties(arpack PROPERTIES VERSION 2.1.0)
-set_target_properties(arpack PROPERTIES SOVERSION 2)
-target_include_directories(arpack
+target_link_options(arpackng PUBLIC "${EXTRA_LDFLAGS}")
+set_target_properties(arpackng PROPERTIES OUTPUT_NAME arpack${LIBSUFFIX}${ITF64SUFFIX})
+set_target_properties(arpackng PROPERTIES VERSION 2.1.0)
+set_target_properties(arpackng PROPERTIES SOVERSION 2)
+target_include_directories(arpackng
   PUBLIC
   # Exported location of headers
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  $<INSTALL_INTERFACE:${ARPACK_INSTALL_INCLUDEDIR}>
   # Find arpackdef.h, arpackicb.h, stat*.h, debug*.h at build time
   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
   # For ICB interface
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ICB>
 )
+add_library(arpack_utils INTERFACE)
+target_include_directories(arpack_utils INTERFACE $<INSTALL_INTERFACE:${ARPACK_INSTALL_INCLUDEDIR}/utils>)
+add_library(arpack INTERFACE)
+target_link_libraries(arpack INTERFACE arpackng arpack_utils)
+
 
 if (MPI)
     # use -DBUILD_SHARED_LIBS=ON|OFF to control static/shared
@@ -826,7 +831,7 @@ configure_file(pkg-config/parpack.pc.in "${PROJECT_BINARY_DIR}/parpack${LIBSUFFI
 configure_file(pkg-config/arpackSolver.pc.in "${PROJECT_BINARY_DIR}/arpackSolver${LIBSUFFIX}${ITF64SUFFIX}.pc" @ONLY)
 
 
-install(TARGETS arpack
+install(TARGETS arpack arpackng arpack_utils
     EXPORT arpackngTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -857,18 +862,18 @@ if(ICB)
   endif()
 endif()
 
-install(FILES debug.h DESTINATION ${ARPACK_INSTALL_INCLUDEDIR})
-install(FILES debugF90.h DESTINATION ${ARPACK_INSTALL_INCLUDEDIR})
+install(FILES debug.h DESTINATION ${ARPACK_INSTALL_INCLUDEDIR}/utils)
+install(FILES debugF90.h DESTINATION ${ARPACK_INSTALL_INCLUDEDIR}/utils)
 if(ICB)
-  install(FILES ICB/debug_c.h DESTINATION ${ARPACK_INSTALL_INCLUDEDIR})
-  install(FILES ICB/debug_c.hpp DESTINATION ${ARPACK_INSTALL_INCLUDEDIR})
+  install(FILES ICB/debug_c.h DESTINATION ${ARPACK_INSTALL_INCLUDEDIR}/utils)
+  install(FILES ICB/debug_c.hpp DESTINATION ${ARPACK_INSTALL_INCLUDEDIR}/utils)
 endif()
 
-install(FILES stat.h DESTINATION ${ARPACK_INSTALL_INCLUDEDIR})
-install(FILES statF90.h DESTINATION ${ARPACK_INSTALL_INCLUDEDIR})
+install(FILES stat.h DESTINATION ${ARPACK_INSTALL_INCLUDEDIR}/utils)
+install(FILES statF90.h DESTINATION ${ARPACK_INSTALL_INCLUDEDIR}/utils)
 if(ICB)
-  install(FILES ICB/stat_c.h DESTINATION ${ARPACK_INSTALL_INCLUDEDIR})
-  install(FILES ICB/stat_c.hpp DESTINATION ${ARPACK_INSTALL_INCLUDEDIR})
+  install(FILES ICB/stat_c.h DESTINATION ${ARPACK_INSTALL_INCLUDEDIR}/utils)
+  install(FILES ICB/stat_c.hpp DESTINATION ${ARPACK_INSTALL_INCLUDEDIR}/utils)
 endif()
 
 configure_file(arpackdef.h.in "${PROJECT_BINARY_DIR}/arpackdef.h" @ONLY)
