@@ -10,4 +10,4 @@ URL: @PACKAGE_URL@
 Requires.private: arpack@LIBSUFFIX@@ITF64SUFFIX@
 Libs: -L${libdir} -lparpack@LIBSUFFIX@@ITF64SUFFIX@
 Libs.private: @PARPACK_PC_LIBS_PRIVATE@
-Cflags: -I${includedir}
+Cflags: -I${includedir} -I${includedir}/utils

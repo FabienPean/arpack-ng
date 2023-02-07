@@ -7,4 +7,4 @@ Description: Utility to test arpack with matrix market files
 Version: @PACKAGE_VERSION@
 URL: @PACKAGE_URL@
 Requires: arpack, eigen3 >= 3.3
-Cflags: -I${includedir}
+Cflags: -I${includedir} -I${includedir}/utils

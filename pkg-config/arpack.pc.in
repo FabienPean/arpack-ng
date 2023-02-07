@@ -9,4 +9,4 @@ Version: @PACKAGE_VERSION@
 URL: @PACKAGE_URL@
 Libs: -L${libdir} -larpack@LIBSUFFIX@@ITF64SUFFIX@
 Libs.private: @ARPACK_PC_LIBS_PRIVATE@
-Cflags: -I${includedir}
+Cflags: -I${includedir} -I${includedir}/utils
