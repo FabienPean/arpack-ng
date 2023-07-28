@@ -228,7 +228,7 @@ c        %-----------------------------------%
 c
          call MPI_COMM_RANK(comm, myid, ierr)
          iseed(1) = 1
-         iseed(2) = 2
+         iseed(2) = 3
          iseed(3) = 1+mod(myid,2039)
          iseed(4) = 1+2*mod(myid,2048)
          inits = .false.
