@@ -228,11 +228,10 @@ c        | Note: the seed must be between 1  |
 c        | and 4095.  iseed(4) must be odd.  |
 c        %-----------------------------------%
 c
-         call MPI_COMM_RANK(comm, myid, ierr)
          iseed(1) = 1
          iseed(2) = 3
-         iseed(3) = 1+mod(myid,2039)
-         iseed(4) = 1+2*mod(myid,2048)
+         iseed(3) = 5
+         iseed(4) = 7
          inits = .false.
       end if
 c
