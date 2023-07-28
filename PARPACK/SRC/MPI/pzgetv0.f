@@ -229,14 +229,10 @@ c        | and 4095.  iseed(4) must be odd.  |
 c        %-----------------------------------%
 c
          call MPI_COMM_RANK(comm, myid, ierr)
-         igen = myid
          iseed(4) = 1+2*mod(myid,2048)
-         igen = myid-2048*(myid/2048)
-         iseed(3) = mod(igen,4096)
-         igen = igen-4096*(igen/4096)
-         iseed(2) = mod(igen,4096)
-         igen = igen-4096*(igen/4096)
-         iseed(1) = mod(igen,4096)
+         iseed(3) = mod(myid,2039)
+         iseed(2) = 2
+         iseed(1) = 1
          inits = .false.
       end if
 c
