@@ -228,11 +228,18 @@ c        | Note: the seed must be between 1  |
 c        | and 4095.  iseed(4) must be odd.  |
 c        %-----------------------------------%
 c
-         iseed = time()
-         iseed(1) = mod(iseed(1),4096)
-         iseed(2) = mod(iseed(2),4096)
-         iseed(3) = mod(iseed(3),4096)
-         iseed(4) = mod(iseed(4),2048) + 1
+         call MPI_COMM_RANK(comm, myid, ierr)
+         igen = 1000 + 2*myid + 1
+         if (igen .gt. 4095) then
+            write(0,*) 'Error in p_getv0: seed exceeds 4095!'
+         end if
+c
+         iseed(1) = igen/1000
+         igen     = mod(igen,1000)
+         iseed(2) = igen/100
+         igen     = mod(igen,100)
+         iseed(3) = igen/10
+         iseed(4) = mod(igen,10)
 c
          inits = .false.
       end if
