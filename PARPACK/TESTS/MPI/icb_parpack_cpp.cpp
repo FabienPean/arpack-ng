@@ -27,7 +27,7 @@ void diagonal_matrix_vector_product(const Real* x, Real* y) {
 }
 
 template <typename Real>
-void real_symmetric_runner(double const& tol_check, arpack::which const& ritz_option) {
+void real_symmetric_runner(Real const& tol_check, arpack::which const& ritz_option) {
   const a_int N      = 1000;
   const a_int nev    = 9;
   const a_int ncv    = 2 * nev + 1;
