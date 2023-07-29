@@ -22,7 +22,7 @@
 template <typename Real>
 void diagonal_matrix_vector_product(const Real* x, Real* y) {
   for (int i = 0; i < 1000; ++i) {
-    y[i] = static_cast<float>(i + 1) * x[i];
+    y[i] = static_cast<Real>(i + 1) * x[i];
   }
 }
 
