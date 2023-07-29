@@ -84,7 +84,7 @@ void real_symmetric_runner(Real const& tol_check, arpack::which const& ritz_opti
   for (int i = 0; i < nev; ++i) {
     Real val = d[i];
     Real ref = (N - (nev - 1) + i);
-    Real eps = std::fabs(val - ref);
+    Real eps = std::fabs((val - ref)/ref);
     std::cout << "rank " << rank  << " : " << val << " - " << ref << " - " << eps << std::endl;
 
     /*eigen value order: smallest -> biggest*/
@@ -163,10 +163,10 @@ void complex_nonsymmetric_runner(double const& tol_check, arpack::which const& r
     for (int i = 0; i < nev; ++i) {
       Real rval = std::real(d[i]);
       Real rref = static_cast<Real>(N - (nev - 1) + i);
-      Real reps = std::fabs(rval - rref);
+      Real reps = std::fabs((rval - rref)/rref);
       Real ival = std::imag(d[i]);
       Real iref = -static_cast<Real>(N - (nev - 1) + i);
-      Real ieps = std::fabs(ival - iref);
+      Real ieps = std::fabs((ival - iref)/iref);
       std::cout << rval << " " << ival << " - " << rref << " " << iref << " - " << reps << " " << ieps << std::endl;
 
       if (reps > tol_check || ieps > tol_check) throw std::domain_error("Correct eigenvalues not computed");
@@ -175,10 +175,10 @@ void complex_nonsymmetric_runner(double const& tol_check, arpack::which const& r
     for (int i = 0; i < nev; ++i) {
       Real rval = std::real(d[i]);
       Real rref = static_cast<Real>(nev - i);
-      Real reps = std::fabs(rval - rref);
+      Real reps = std::fabs((rval - rref)/rref);
       Real ival = std::imag(d[i]);
       Real iref = -static_cast<Real>(nev - i);
-      Real ieps = std::fabs(ival - iref);
+      Real ieps = std::fabs((ival - iref)/iref);
       std::cout << rval << " " << ival << " - " << rref << " " << iref << " - " << reps << " " << ieps << std::endl;
 
       if (reps > tol_check || ieps > tol_check) throw std::domain_error("Correct eigenvalues not computed");
