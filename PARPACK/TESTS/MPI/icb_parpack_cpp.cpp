@@ -13,6 +13,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <vector>
 
 #include "parpack.hpp"
@@ -196,10 +197,10 @@ int main() {
 
   try {
     // parpack without debug
-    // real_symmetric_runner<float>(1.e-05, arpack::which::largest_magnitude);
-    // real_symmetric_runner<float>(1.e-05, arpack::which::largest_algebraic);
-    real_symmetric_runner<double>(1.e-05, arpack::which::largest_magnitude);
-    real_symmetric_runner<double>(1.e-05, arpack::which::largest_algebraic);
+    real_symmetric_runner<float> (std::sqrt(std::numeric_limits<float>::epsilon()), arpack::which::largest_magnitude);
+    real_symmetric_runner<float> (std::sqrt(std::numeric_limits<float>::epsilon()), arpack::which::largest_algebraic);
+    real_symmetric_runner<double>(std::sqrt(std::numeric_limits<double>::epsilon()), arpack::which::largest_magnitude);
+    real_symmetric_runner<double>(std::sqrt(std::numeric_limits<double>::epsilon()), arpack::which::largest_algebraic);
   } catch (std::domain_error& e) {
     std::cout << e.what() << std::endl;
     MPI_Abort(MPI_COMM_WORLD, 1);
@@ -231,10 +232,10 @@ int main() {
           1);
 
   try {
-    // complex_nonsymmetric_runner<float>(1.e-5, arpack::which::largest_magnitude);
-    // complex_nonsymmetric_runner<float>(1.e-5, arpack::which::largest_imaginary);
-    complex_nonsymmetric_runner<double>(1.e-05, arpack::which::largest_magnitude);
-    complex_nonsymmetric_runner<double>(1.e-05, arpack::which::largest_imaginary);
+    complex_nonsymmetric_runner<float> (std::sqrt(std::numeric_limits<float>::epsilon()), arpack::which::largest_magnitude);
+    complex_nonsymmetric_runner<float> (std::sqrt(std::numeric_limits<float>::epsilon()), arpack::which::largest_imaginary);
+    complex_nonsymmetric_runner<double>(std::sqrt(std::numeric_limits<double>::epsilon()), arpack::which::largest_magnitude);
+    complex_nonsymmetric_runner<double>(std::sqrt(std::numeric_limits<double>::epsilon()), arpack::which::largest_imaginary);
   } catch (std::domain_error& e) {
     std::cout << e.what() << '\n';
     MPI_Abort(MPI_COMM_WORLD, 1);
