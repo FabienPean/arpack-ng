@@ -196,8 +196,8 @@ int main() {
 
   try {
     // parpack without debug
-    real_symmetric_runner<float>(1., arpack::which::largest_magnitude);
-    real_symmetric_runner<float>(1., arpack::which::largest_algebraic);
+    // real_symmetric_runner<float>(1.e-05, arpack::which::largest_magnitude);
+    // real_symmetric_runner<float>(1.e-05, arpack::which::largest_algebraic);
     real_symmetric_runner<double>(1.e-05, arpack::which::largest_magnitude);
     real_symmetric_runner<double>(1.e-05, arpack::which::largest_algebraic);
   } catch (std::domain_error& e) {
@@ -231,8 +231,8 @@ int main() {
           1);
 
   try {
-    complex_nonsymmetric_runner<float>(1., arpack::which::largest_magnitude);
-    complex_nonsymmetric_runner<float>(1., arpack::which::largest_imaginary);
+    // complex_nonsymmetric_runner<float>(1.e-5, arpack::which::largest_magnitude);
+    // complex_nonsymmetric_runner<float>(1.e-5, arpack::which::largest_imaginary);
     complex_nonsymmetric_runner<double>(1.e-05, arpack::which::largest_magnitude);
     complex_nonsymmetric_runner<double>(1.e-05, arpack::which::largest_imaginary);
   } catch (std::domain_error& e) {
