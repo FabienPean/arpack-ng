@@ -177,7 +177,7 @@ c     | Local Scalars & Arrays |
 c     %------------------------%
 c
       logical    first, inits, orth
-      integer    idist, iseed(4), iter, msglvl, jj, myid, igen
+      integer    idist, iseed(4), iter, msglvl, jj
       Double precision
      &           rnorm0
       Complex*16
@@ -228,8 +228,7 @@ c        | Note: the seed must be between 1  |
 c        | and 4095.  iseed(4) must be odd.  |
 c        %-----------------------------------%
 c
-         call MPI_COMM_RANK(comm, myid, ierr)
-         iseed(1) = 1 + myid
+         iseed(1) = 1
          iseed(2) = 3
          iseed(3) = 5
          iseed(4) = 7
